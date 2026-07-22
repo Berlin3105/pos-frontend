@@ -1,0 +1,317 @@
+.container {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  width: 100%;
+  padding: 1rem;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 1.5rem;
+  }
+}
+
+.header {
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.header h2 {
+  font-size: 0.875rem;
+  font-weight: 900;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.tabLayout {
+  display: flex;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+}
+
+.tabBtn {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.activeTab {
+  border-bottom-color: #f59e0b;
+  color: #f59e0b;
+  font-weight: 900;
+}
+
+.inactiveTab {
+  color: #94a3b8;
+}
+
+.inactiveTab:hover {
+  color: #475569;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .formGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .formGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  display: block;
+  font-size: 10px;
+  font-weight: 900;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.inputField, .selectField {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-medium: 500;
+  color: #1e293b;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.inputField:focus, .selectField:focus {
+  border-color: #f59e0b;
+}
+
+.readOnlyField {
+  background-color: #f1f5f9;
+  border-color: #e2e8f0;
+  font-weight: 700;
+  color: #334155;
+}
+
+.btnGroup {
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.btnSubmit {
+  background-color: #f59e0b;
+  color: #0f172a;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.btnSubmit:hover { background-color: #d97706; }
+
+.btnCancel {
+  background-color: #e2e8f0;
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.btnCancel:hover { background-color: #cbd5e1; }
+
+.searchBox {
+  max-width: 28rem;
+  margin-bottom: 1rem;
+}
+
+.tableWrapper {
+  display: none;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+}
+
+@media (min-width: 768px) {
+  .tableWrapper { display: block; }
+}
+
+.table {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.tableHead Row {
+  background-color: #0f172a;
+  color: #ffffff;
+  text-transform: uppercase;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+.tableHead th {
+  padding: 0.75rem;
+  font-size: 10px;
+}
+
+.tableBody tr {
+  border-bottom: 1px solid #f1f5f9;
+  font-medium: 500;
+  color: #334155;
+}
+
+.tableBody tr:hover { background-color: #f8fafc; }
+.tableBody td { padding: 0.75rem; }
+
+.textCode { font-weight: 700; color: #0f172a; }
+.textBold { font-weight: 700; }
+.textBlue { font-weight: 700; color: #2563eb; }
+.textGreen { font-weight: 700; color: #16a34a; }
+.textMuted { color: #64748b; }
+
+.btnEdit {
+  background-color: #2563eb;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border: none;
+  cursor: pointer;
+  margin-right: 4px;
+}
+.btnEdit:hover { background-color: #1d4ed8; }
+
+.btnDelete {
+  background-color: #dc2626;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border: none;
+  cursor: pointer;
+}
+.btnDelete:hover { background-color: #b91c1c; }
+
+/* Mobile View Cards */
+.mobileCardsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .mobileCardsGrid { display: none; }
+}
+
+.mobileCard {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.375rem;
+}
+
+.badgeCode {
+  background-color: #0f172a;
+  color: #f59e0b;
+  padding: 0.125rem 0.5rem;
+  font-weight: 900;
+  font-size: 10px;
+}
+
+.badgeUnit {
+  color: #64748b;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.cardTitle {
+  font-size: 0.875rem;
+  font-weight: 900;
+  color: #1e293b;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.cardSubTitle {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.ratesBox {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  background-color: #ffffff;
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  font-size: 11px;
+}
+
+.rateLabel {
+  color: #94a3b8;
+  font-weight: 700;
+  display: block;
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.mobileActions {
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.mobileBtnEdit, .mobileBtnDelete {
+  flex: 1;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.375rem;
+  border: none;
+  cursor: pointer;
+  color: #ffffff;
+}
+
+.mobileBtnEdit { background-color: #2563eb; }
+.mobileBtnDelete { background-color: #dc2626; }

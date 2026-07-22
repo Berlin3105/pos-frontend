@@ -1,0 +1,375 @@
+.posContainer {
+  background-color: #f8fafc;
+  padding: 1rem;
+  width: 100%;
+  font-family: sans-serif;
+}
+
+.posHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tabButtons button {
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  border: 1px solid #cbd5e1;
+  background: white;
+  cursor: pointer;
+}
+
+.activeTab {
+  background: #0f172a !important;
+  color: white;
+  border-color: #0f172a !important;
+}
+
+/* பிரதான லேஅவுட் கிரிட் */
+.posBody {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .posBody {
+    grid-template-columns: 1.5fr 1fr; /* பெரிய ஸ்கிரீன்களில் இரண்டு பாகங்களாகப் பிரியும் */
+  }
+}
+
+.gridSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.gridBlock h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+/* டச் செய்ய சுலபமான பட்டன் கிரிட் */
+.touchGrid, .groupGrid, .productGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 0.5rem;
+}
+
+.productGrid {
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+}
+
+.gridBtn, .groupBtn {
+  padding: 0.75rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: bold;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selectedBtn, .selectedGroupBtn {
+  background: #3b82f6 !important;
+  color: white !important;
+  border-color: #3b82f6 !important;
+}
+
+/* AC / Non AC பட்டன்கள் */
+.typeBlock {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.typeBtn {
+  flex: 1;
+  padding: 0.75rem;
+  font-weight: bold;
+  border: 1px solid #cbd5e1;
+  background: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.activeNonAc { background: #10b981; color: white; border-color: #10b981; }
+.activeAc { background: #ef4444; color: white; border-color: #ef4444; }
+
+/* புராடக்ட் கார்டு டிசைன் */
+.productBtn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.75rem 0.5rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 70px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.pName { font-weight: bold; font-size: 0.85rem; color: #1e293b; text-align: center;}
+.pPrice { color: #2563eb; font-size: 0.8rem; font-weight: bold; margin-top: 4px; }
+
+/* பில்லிங் பகுதி */
+.billingSection {
+  background: white;
+  border: 1px solid #e2e8f0;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+.billInvoiceInfo {
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px dashed #cbd5e1;
+  padding-bottom: 0.5rem;
+}
+
+.cartContainer {
+  max-height: 250px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.cartTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.cartTable th { border-bottom: 2px solid #e2e8f0; text-align: left; padding: 0.5rem 0; }
+.cartTable td { padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9; }
+
+.cartInput {
+  width: 50px;
+  padding: 0.25rem;
+  border: 1px solid #cbd5e1;
+}
+
+.cartDelBtn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 2px 6px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+/* சம்மரி கணக்கீடு */
+.summaryBlock {
+  background: #f8fafc;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.35rem 0;
+  font-size: 0.9rem;
+}
+
+.gstInput {
+  width: 50px;
+  text-align: center;
+}
+
+.btnPlaceOrder {
+  width: 100%;
+  padding: 1rem;
+  background: #10b981;
+  color: white;
+  border: none;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+/* List View Styles */
+.listContainer { overflow-x: auto; background: white; padding: 1rem;}
+.orderTable { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+.orderTable th { background: #f1f5f9; padding: 0.75rem; }
+.orderTable td { padding: 0.75rem; border-bottom: 1px solid #e2e8f0; }
+.btnListDel { background: #ef4444; color: white; border: none; padding: 4px 8px; cursor: pointer; }
+
+/* Qty டச் பட்டன் ஸ்டைல் */
+.qtyTouchBtn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  color: #0f172a;
+  cursor: pointer;
+  display: inline-block;
+}
+
+/* நம்பர் பேட் பாப்-அப் பேக்ரவுண்ட் */
+.numPadOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+/* நம்பர் பேட் பாக்ஸ் */
+.numPadContainer {
+  background: white;
+  width: 100%;
+  max-width: 320px;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+}
+
+.numPadHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  color: #475569;
+  margin-bottom: 0.75rem;
+}
+
+.closePadBtn {
+  background: none;
+  border: none;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #ef4444;
+}
+
+/* டிஸ்ப்ளே திரை */
+.numPadDisplay {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.75rem;
+  text-align: right;
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #0f172a;
+  margin-bottom: 1rem;
+  min-height: 40px;
+}
+
+/* நம்பர் கிரிட் (3x4) */
+.numPadGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.numPadBtn {
+  padding: 1rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #1e293b;
+  transition: background 0.1s;
+}
+
+.numPadBtn:active {
+  background: #cbd5e1;
+}
+
+/* ஸ்பெஷல் பட்டன் கலர்ஸ் */
+.clearBtn { color: #ef4444; background: #fee2e2; }
+.backBtn { color: #f59e0b; background: #fef3c7; }
+
+/* சப்மிட் பட்டன் */
+.numPadSubmitBtn {
+  width: 100%;
+  padding: 0.85rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.numPadSubmitBtn:active {
+  background: #2563eb;
+}
+
+/* இரண்டு பட்டன்களுக்கான புதிய குரூப் ஸ்டைல் */
+.actionBtnGroup {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* சரிபாதியாகப் பிரியும் */
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btnSaveOnly, .btnSavePrint {
+  padding: 1rem 0.5rem;
+  font-weight: bold;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  text-transform: uppercase;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: background 0.2s;
+}
+
+/* Save Only - சாம்பல்/நீல நிறம் */
+.btnSaveOnly {
+  background: #64748b;
+  color: white;
+}
+
+.btnSaveOnly:active {
+  background: #475569;
+}
+
+/* Save & Print - பச்சை நிறம் */
+.btnSavePrint {
+  background: #10b981;
+  color: white;
+}
+
+.btnSavePrint:active {
+  background: #059669;
+}
+
+/* மொபைல் வியூவில் பட்டன் எழுத்துக்கள் சுருங்காமல் இருக்க */
+@media (max-width: 480px) {
+  .btnSaveOnly, .btnSavePrint {
+    font-size: 0.85rem;
+    padding: 0.85rem 0.25rem;
+  }
+}

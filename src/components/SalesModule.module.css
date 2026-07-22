@@ -1,0 +1,403 @@
+.salesContainer {
+  padding: 10px;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.salesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 12px;
+}
+
+.salesHeader h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #0f172a;
+}
+
+.tabGroup {
+  display: flex;
+  gap: 8px;
+}
+
+.tabGroup button {
+  padding: 8px 14px;
+  border: 1px solid #cbd5e1;
+  background: #f1f5f9;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tabGroup .activeTab {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+/* Body Layout */
+.salesBody {
+  display: flex;
+  gap: 15px;
+}
+
+.leftPanel {
+  flex: 1.2;
+}
+
+.rightPanel {
+  flex: 0.8;
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Table Selection CSS */
+.gridBlock h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.touchGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 0.5rem;
+}
+
+.gridBtn {
+  padding: 0.75rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: bold;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.selectedBtn {
+  background: #3b82f6 !important;
+  color: white !important;
+  border-color: #3b82f6 !important;
+}
+
+/* AC / Non-AC Buttons */
+.typeBlock {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.typeBtn {
+  flex: 1;
+  padding: 0.75rem;
+  font-weight: bold;
+  border: 1px solid #cbd5e1;
+  background: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.activeNonAc { background: #10b981; color: white; border-color: #10b981; }
+.activeAc { background: #ef4444; color: white; border-color: #ef4444; }
+
+/* Tokens Section */
+.tokenSection h4 {
+  margin-top: 0;
+  color: #334155;
+}
+
+.tokenGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.tokenCard {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tokenCard:hover {
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+}
+
+.selectedTokenCard {
+  border-color: #16a34a;
+  background: #f0fdf4;
+}
+
+.tokenBadge {
+  background: #0f172a;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.tokenDetails span {
+  display: block;
+  font-size: 0.8rem;
+  color: #475569;
+  margin-top: 2px;
+}
+
+/* Touch Product Grid */
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.productCard {
+  background: white;
+  border: 1px solid #cbd5e1;
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Cart & Payment */
+.cartScroll {
+  max-height: 200px;
+  overflow-y: auto;
+  border-bottom: 2px dashed #e2e8f0;
+  margin-bottom: 10px;
+}
+
+.cartTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.cartTable th, .cartTable td {
+  padding: 6px;
+  text-align: left;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.cartDelBtn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 2px 6px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.qtyTouchBtn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.paymentBox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.payRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.payInput {
+  width: 90px;
+  padding: 4px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  text-align: right;
+  font-weight: bold;
+}
+
+.netPayableRow {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #16a34a;
+  background: #f0fdf4;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.modeGroup {
+  display: flex;
+  gap: 6px;
+  margin: 6px 0;
+}
+
+.modeBtn {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.activeMode {
+  background: #0f172a;
+  color: white;
+  border-color: #0f172a;
+}
+
+.paySubmitBtn {
+  width: 100%;
+  padding: 12px;
+  background: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+/* Product Group Grid */
+.groupGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.5rem;
+}
+
+.groupBtn {
+  padding: 0.75rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: bold;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.selectedGroupBtn {
+  background: #3b82f6 !important;
+  color: white !important;
+}
+
+/* 🔢 NumPad (Number Plate) Overlay Styles */
+.numPadOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.numPadContainer {
+  background: white;
+  width: 100%;
+  max-width: 320px;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+}
+
+.numPadHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  color: #475569;
+  margin-bottom: 0.75rem;
+}
+
+.closePadBtn {
+  background: none;
+  border: none;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #ef4444;
+}
+
+.numPadDisplay {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.75rem;
+  text-align: right;
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #0f172a;
+  margin-bottom: 1rem;
+  min-height: 40px;
+}
+
+.numPadGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.numPadBtn {
+  padding: 1rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #1e293b;
+}
+
+.clearBtn { color: #ef4444; background: #fee2e2; }
+.backBtn { color: #f59e0b; background: #fef3c7; }
+
+.numPadSubmitBtn {
+  width: 100%;
+  padding: 0.85rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .salesBody {
+    flex-direction: column;
+  }
+}

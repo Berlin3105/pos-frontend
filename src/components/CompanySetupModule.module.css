@@ -1,0 +1,122 @@
+.container {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  width: 100%;
+  padding: 1rem;
+}
+@media (min-width: 768px) { .container { padding: 1.5rem; } }
+
+.header {
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+.header h2 {
+  font-size: 0.875rem;
+  font-weight: 900;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.tabLayout {
+  display: flex;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+}
+.tabBtn {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background-color: transparent;
+  cursor: pointer;
+}
+.activeTab { border-bottom-color: #f59e0b; color: #f59e0b; font-weight: 900; }
+.inactiveTab { color: #94a3b8; }
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 640px) { .formGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .formGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+.fieldGroup { display: flex; flex-direction: column; }
+.label {
+  font-size: 10px;
+  font-weight: 900;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+.inputField, .selectField {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  color: #1e293b;
+  outline: none;
+  box-sizing: border-box;
+}
+.inputField:focus, .selectField:focus { border-color: #f59e0b; }
+
+.imagePreviewBox {
+  margin-top: 0.5rem;
+  width: 80px;
+  height: 80px;
+  border: 1px dashed #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #f8fafc;
+}
+.previewImg { width: 100%; height: 100%; object-fit: cover; }
+
+.btnGroup { display: flex; gap: 0.5rem; padding-top: 1rem; }
+.btnSubmit { background-color: #f59e0b; color: #0f172a; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; padding: 0.5rem 1rem; border: none; cursor: pointer; }
+.btnCancel { background-color: #e2e8f0; color: #334155; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 0.5rem 1rem; border: none; cursor: pointer; }
+
+/* Table and List view */
+.tableWrapper { display: none; overflow-x: auto; border: 1px solid #e2e8f0; }
+@media (min-width: 768px) { .tableWrapper { display: block; } }
+.table { width: 100%; text-align: left; border-collapse: collapse; font-size: 0.75rem; }
+.tableHead th { background-color: #0f172a; color: #ffffff; padding: 0.75rem; font-size: 10px; text-transform: uppercase; }
+.tableBody tr { border-bottom: 1px solid #f1f5f9; }
+.tableBody td { padding: 0.75rem; vertical-align: middle; }
+
+.thumbImg { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0; }
+
+.btnEdit { background-color: #2563eb; color: white; font-size: 10px; font-weight:700; padding: 0.25rem 0.5rem; border: none; cursor: pointer; margin-right: 4px; text-transform: uppercase;}
+.btnDelete { background-color: #dc2626; color: white; font-size: 10px; font-weight:700; padding: 0.25rem 0.5rem; border: none; cursor: pointer; text-transform: uppercase;}
+
+/* Cards View for Mobile */
+.mobileCardsGrid { display: grid; grid-template-columns: 1fr; gap: 0.75rem; }
+@media (min-width: 768px) { .mobileCardsGrid { display: none; } }
+.mobileCard { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.cardTop { display: flex; gap: 1rem; align-items: center; }
+.cardDetails p { margin: 2px 0; font-size: 11px; color: #475569; }
+.mobileActions { display: flex; gap: 0.5rem; margin-top: 0.5rem; border-top: 1px solid #e2e8f0; padding-top: 0.5rem; }
+.mobileBtnEdit { background-color: #2563eb; color: white; flex: 1; text-align: center; padding: 0.375rem; font-size: 10px; font-weight: 700; border: none; text-transform: uppercase;}
+.mobileBtnDelete { background-color: #dc2626; color: white; flex: 1; text-align: center; padding: 0.375rem; font-size: 10px; font-weight: 700; border: none; text-transform: uppercase;}
+
+/* ஏற்கனவே கொடுத்த சிஎஸ்எஸ் கோப்பில் .selectField சேர்க்கப்பட்டுள்ளது, இருந்தாலும் இதையும் சரிபார்த்துக் கொள்ளவும் */
+.selectField {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  color: #1e293b;
+  outline: none;
+  box-sizing: border-box;
+}
+.selectField:focus { border-color: #f59e0b; }

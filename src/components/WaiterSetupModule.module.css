@@ -1,0 +1,263 @@
+.container {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  width: 100%;
+}
+
+.headerWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .headerWrapper {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 900;
+  color: #1e293b;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.tabLayout {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tabBtn {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.activeTab {
+  background-color: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+/* Form Styles */
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .formGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+.inputField, .inputFieldDisabled {
+  padding: 0.5rem;
+  border: 1px solid #cbd5e1;
+  font-size: 0.875rem;
+  outline: none;
+  width: 100%;
+}
+
+.inputFieldDisabled {
+  background-color: #f1f5f9;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.btnGroup {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btnSubmit {
+  background-color: #10b981;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.btnCancel {
+  background-color: #64748b;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+/* List & Search */
+.searchWrapper {
+  margin-bottom: 1rem;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #cbd5e1;
+  font-size: 0.875rem;
+}
+
+/* Desktop Table Layout */
+.tableResponsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+@media (max-width: 767px) {
+  .tableResponsive {
+    display: none; /* மொபைலில் டேபிளை மறைக்கிறோம் */
+  }
+}
+
+.waiterTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.tableHeaderRow th {
+  background-color: #f1f5f9;
+  padding: 0.75rem;
+  font-weight: 700;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.tableBodyRow td {
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+}
+
+.tableCellId { font-weight: 700; color: #0f172a; }
+.tableCellName { font-weight: 700; color: #475569; text-transform: uppercase; }
+.tableCellStandard { color: #334155; }
+
+.tableCellActions {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.btnTableEdit, .btnTableDel {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.675rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+.btnTableEdit { background-color: #3b82f6; }
+.btnTableDel { background-color: #ef4444; }
+
+.noRecordsCell {
+  text-align: center;
+  padding: 2rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* Mobile Cards View Layout */
+.mobileCardsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .mobileCardsGrid {
+    display: none; /* டெஸ்கடாப்பில் கார்டுகளை மறைக்கிறோம் */
+  }
+}
+
+.mobileCard {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.cardHeader {
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.cardId {
+  font-weight: 900;
+  color: #0f172a;
+  background-color: #e2e8f0;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.75rem;
+}
+
+.cardBody p {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+  color: #334155;
+}
+
+.cardActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.mobileBtnEdit, .mobileBtnDel {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: none;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: white;
+  text-align: center;
+}
+
+.mobileBtnEdit { background-color: #3b82f6; }
+.mobileBtnDel { background-color: #ef4444; }
