@@ -41,12 +41,14 @@ function LoginView({
   //   handleLogin(e);
   // };
 
+  const BACKEND_URL = 'https://pos-backend-kuog.onrender.com';
+
   const onFormSubmit = async (e) => {
     e.preventDefault();
     
     try {
       // 🔄 இங்க உங்க சரியான API எண்ட்பாயிண்ட்ட போடுங்க (எ.கா: /api/auth/login)
-      const res = await axios.post('http://localhost:5000/api/auth/login', { 
+      const res = await axios.post(`${BACKEND_URL}/api/auth/login`, { 
         username, 
         password 
       });

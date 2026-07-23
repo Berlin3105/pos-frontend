@@ -11,6 +11,8 @@ function CompanySetupModule() {
   const companyNameRef = useRef(null); //[cite: 10]
   const fileInputRef = useRef(null); //[cite: 10]
 
+  
+
   // Form States
   const [formData, setFormData] = useState({
     company_name: '', //[cite: 10]

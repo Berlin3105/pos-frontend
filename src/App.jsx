@@ -9,7 +9,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [activeMenu, setActiveMenu] = useState('dashboard');
-
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
   const menuOptions = [
     { id: 'dashboard', label: '📊 Dashboard' },
     { id: 'ledger_setup', label: '🪪 Ledger Setup' },
@@ -45,7 +45,7 @@ function App() {
     setErrorMessage('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(`${BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
