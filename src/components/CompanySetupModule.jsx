@@ -35,11 +35,11 @@ function CompanySetupModule() {
     kot_lang: 'English',
     sales_lang: 'English'         
   });
-
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
   // சிஸ்டம் பிரிண்டர் பட்டியலை எடுக்க
   const fetchSystemPrinters = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/system-printers');
+      const res = await fetch(`${BACKEND_URL}/api/system-printers`);
       const data = await res.json();
       setSystemPrinters(data);
     } catch (err) { console.error("Error fetching system printers:", err); }
@@ -47,7 +47,7 @@ function CompanySetupModule() {
 
   const fetchLedgers = async () => { //[cite: 10]
     try {
-      const res = await fetch('http://localhost:5000/api/ledgers'); //[cite: 10]
+      const res = await fetch(`${BACKEND_URL}/api/ledgers`); //[cite: 10]
       const data = await res.json(); //[cite: 10]
       setLedgers(data); //[cite: 10]
     } catch (err) { console.error("Error fetching ledgers:", err); } //[cite: 10]
@@ -55,7 +55,7 @@ function CompanySetupModule() {
 
   const fetchCompanyProfile = async () => { //[cite: 10]
     try {
-      const res = await fetch('http://localhost:5000/api/companies/single'); //[cite: 10]
+      const res = await fetch(`${BACKEND_URL}/api/companies/single`); //[cite: 10]
       const data = await res.json(); //[cite: 10]
       
       if (data) { //[cite: 10]
@@ -82,7 +82,7 @@ function CompanySetupModule() {
           sales_lang: data.sales_lang || 'English'
         });
         if (data.image_path) { //[cite: 10]
-          setImagePreview(`http://localhost:5000/${data.image_path}`); //[cite: 10]
+          setImagePreview(`${BACKEND_URL}/${data.image_path}`); //[cite: 10]
         }
       }
     } catch (err) { console.error("Error fetching company profile:", err); } //[cite: 10]
@@ -134,7 +134,7 @@ function CompanySetupModule() {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/companies/save-single', { //[cite: 10]
+      const res = await fetch(`${BACKEND_URL}/api/companies/save-single`, { //[cite: 10]
         method: 'POST', //[cite: 10]
         body: data //[cite: 10]
       });
