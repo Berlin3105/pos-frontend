@@ -9,7 +9,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [activeMenu, setActiveMenu] = useState('dashboard');
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+  const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
   const menuOptions = [
     { id: 'dashboard', label: '📊 Dashboard' },
     { id: 'ledger_setup', label: '🪪 Ledger Setup' },

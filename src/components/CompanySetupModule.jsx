@@ -35,7 +35,7 @@ function CompanySetupModule() {
     kot_lang: 'English',
     sales_lang: 'English'         
   });
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+  const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
   // சிஸ்டம் பிரிண்டர் பட்டியலை எடுக்க
   const fetchSystemPrinters = async () => {
     try {
