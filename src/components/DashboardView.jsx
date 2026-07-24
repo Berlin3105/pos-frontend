@@ -8,6 +8,7 @@ import TableSetupModule from './TableSetupModule';
 import OrderSetupModule from './OrderSetupModule';
 import SalesModule from './SalesModule';
 import PasswordSetup from './PasswordSetup';
+import { BACKEND_URL } from '../config.js';
 
 function DashboardView({ username, handleLogout, activeMenu, setActiveMenu, menuOptions, dashboardStats }) {
   // மொபைல் மெனுவை கன்ட்ரோல் செய்ய புது ஸ்டேட்

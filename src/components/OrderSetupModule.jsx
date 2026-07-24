@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './OrderSetupModule.module.css';
+import { BACKEND_URL } from '../config.js';
 
 function OrderSetupModule() {
   const [activeTab, setActiveTab] = useState('entry');
@@ -43,7 +44,7 @@ function OrderSetupModule() {
       const targetFrom = fDate || fromDate;
       const targetTo = tDate || toDate;
       
-      const res = await fetch(`http://localhost:5000/api/orders?from_date=${targetFrom}&to_date=${targetTo}`);
+      const res = await fetch(`${BACKEND_URL}/api/orders?from_date=${targetFrom}&to_date=${targetTo}`);
       if (res.ok) {
         const data = await res.json();
         setOrdersList(data);
@@ -146,25 +147,25 @@ function OrderSetupModule() {
 
   const fetchInitialData = async () => {
     try {
-      const noRes = await fetch('http://localhost:5000/api/orders/next-no');
+      const noRes = await fetch(`${BACKEND_URL}/api/orders/next-no`);
       const noData = await noRes.json();
       setOrderNo(noData.nextNo);
 
-      const wRes = await fetch('http://localhost:5000/api/waiters');
+      const wRes = await fetch(`${BACKEND_URL}/api/waiters`);
       setWaiters(await wRes.json());
 
-      const tRes = await fetch('http://localhost:5000/api/tables');
+      const tRes = await fetch(`${BACKEND_URL}/api/tables`);
       setTables(await tRes.json());
 
       // 👇 இங்க உங்க தற்போதைய தேதி பாஸ் பண்ணி கரண்ட் டேட்டா மட்டும் எடுக்கிறோம்
       const todayStr = getTodayDateString();
-      const oRes = await fetch(`http://localhost:5000/api/orders?from_date=${todayStr}&to_date=${todayStr}`);
+      const oRes = await fetch(`${BACKEND_URL}/api/orders?from_date=${todayStr}&to_date=${todayStr}`);
       setOrdersList(await oRes.json());
 
-      const groupRes = await fetch('http://localhost:5000/api/product-groups');
+      const groupRes = await fetch(`${BACKEND_URL}/api/product-groups`);
       setGroups(await groupRes.json());
 
-      const productRes = await fetch('http://localhost:5000/api/products');
+      const productRes = await fetch(`${BACKEND_URL}/api/products`);
       const productData = await productRes.json();
       setProducts(productData);
       setFilteredProducts(productData); 
@@ -264,7 +265,7 @@ function OrderSetupModule() {
     };
 
     try {
-      const url = editingOrderId ? `http://localhost:5000/api/orders/${editingOrderId}` : 'http://localhost:5000/api/orders';
+      const url = editingOrderId ? `${BACKEND_URL}/api/orders/${editingOrderId}` : `${BACKEND_URL}/api/orders`;
       const method = editingOrderId ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
@@ -292,14 +293,14 @@ function OrderSetupModule() {
 
   const deleteOrder = async (id) => {
     if (window.confirm("Delete this order?")) {
-      await fetch(`http://localhost:5000/api/orders/${id}`, { method: 'DELETE' });
+      await fetch(`${BACKEND_URL}/api/orders/${id}`, { method: 'DELETE' });
       fetchInitialData();
     }
   };
 
   const startEditOrder = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/orders/${id}`);
+      const res = await fetch(`${BACKEND_URL}/api/orders/${id}`);
       if (res.ok) {
         const data = await res.json();
         setEditingOrderId(data.order.id);
@@ -330,7 +331,16 @@ function OrderSetupModule() {
         <h2>🛒 POS Order Setup</h2>
         <div className={styles.tabButtons}>
           <button onClick={() => { setActiveTab('entry'); resetPOS(); }} className={activeTab === 'entry' ? styles.activeTab : ''}>POS Screen</button>
-          <button onClick={() => setActiveTab('list')} className={activeTab === 'list' ? styles.activeTab : ''}>Orders List</button>
+          {/* <button onClick={() => setActiveTab('list')} className={activeTab === 'list' ? styles.activeTab : ''}>Orders List</button> */}
+          <button 
+            onClick={() => { 
+              setActiveTab('list'); 
+              fetchFilteredOrders(); 
+            }} 
+            className={activeTab === 'list' ? styles.activeTab : ''}
+          >
+            Orders List
+          </button>
         </div>
       </div>
 
@@ -457,7 +467,7 @@ function OrderSetupModule() {
 
                     {p.product_image ? (
                       <img
-                        src={`http://localhost:5000/uploads/${p.product_image}`}
+                        src={`${BACKEND_URL}/uploads/${p.product_image}`}
                         alt={p.product_name}
                         className={styles.productImg}
                       />

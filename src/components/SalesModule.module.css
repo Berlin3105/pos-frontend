@@ -396,8 +396,96 @@
   cursor: pointer;
 }
 
+/* List View Styles */
+.billBadge {
+  color: #2563eb;
+  font-size: 0.9rem;
+  margin-left: 8px;
+}
+
+.listViewContainer {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.filterBar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.dateInput {
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+}
+
+.filterBtn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.listTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.listTable th, .listTable td {
+  padding: 10px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.listTable th {
+  background: #f8fafc;
+  color: #334155;
+}
+
+.btnPrint {
+  background: #0284c7;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 6px;
+}
+
+.btnDelete {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btnEdit {
+  background: #f59e0b;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 6px;
+  font-weight: bold;
+}
+
+.btnEdit:hover {
+  background: #d97706;
+}
+
 @media (max-width: 768px) {
   .salesBody {
     flex-direction: column;
   }
 }
+

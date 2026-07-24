@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './LedgerSetup.module.css'; // CSS Module Import
+import { BACKEND_URL } from '../config.js';
 
 function LedgerSetupModule() {
   const [activeTab, setActiveTab] = useState('entry'); 
@@ -18,7 +19,7 @@ function LedgerSetupModule() {
 
   const fetchLedgers = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/ledgers');
+      const res = await fetch(`${BACKEND_URL}/api/ledgers`);
       const data = await res.json();
       setLedgers(data);
     } catch (err) {
@@ -28,7 +29,7 @@ function LedgerSetupModule() {
 
   const fetchNextLedgerId = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/ledgers/next-id');
+      const res = await fetch(`${BACKEND_URL}/api/ledgers/next-id`);
       const data = await res.json();
       setFormData(prev => ({ ...prev, ledger_id: data.nextId }));
     } catch (err) {
@@ -50,8 +51,8 @@ function LedgerSetupModule() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const url = isEditing 
-      ? `http://localhost:5000/api/ledgers/${formData.id}` 
-      : 'http://localhost:5000/api/ledgers';
+      ? `${BACKEND_URL}/api/ledgers/${formData.id}` 
+      : `${BACKEND_URL}/api/ledgers`;
     const method = isEditing ? 'PUT' : 'POST';
 
     try {
@@ -80,7 +81,7 @@ function LedgerSetupModule() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this ledger?")) {
       try {
-        const res = await fetch(`http://localhost:5000/api/ledgers/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${BACKEND_URL}/api/ledgers/${id}`, { method: 'DELETE' });
         if (res.ok) {
           alert("Ledger Deleted!");
           fetchLedgers();

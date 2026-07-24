@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './WaiterSetupModule.module.css';
+import { BACKEND_URL } from '../config.js';
 
 function WaiterSetupModule() {
   const [activeTab, setActiveTab] = useState('entry'); 
@@ -16,7 +17,7 @@ function WaiterSetupModule() {
   // அனைத்து வெயிட்டர்களையும் சர்வரில் இருந்து எடுக்க
   const fetchWaiters = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/waiters');
+      const res = await fetch(`${BACKEND_URL}/api/waiters`);
       const data = await res.json();
       setWaiters(data);
     } catch (err) {
@@ -27,7 +28,7 @@ function WaiterSetupModule() {
   // அடுத்த ஆட்டோ இன்க்ரிமென்ட் Waiter ID-ஐ எடுக்க
   const fetchNextWaiterId = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/waiters/next-id');
+      const res = await fetch(`${BACKEND_URL}/api/waiters/next-id`);
       const data = await res.json();
       setFormData(prev => ({ ...prev, waiter_id: data.nextId }));
     } catch (err) {
@@ -51,8 +52,8 @@ function WaiterSetupModule() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const url = isEditing 
-      ? `http://localhost:5000/api/waiters/${formData.id}`
-      : 'http://localhost:5000/api/waiters';
+      ? `${BACKEND_URL}/api/waiters/${formData.id}`
+      : `${BACKEND_URL}/api/waiters`;
     const method = isEditing ? 'PUT' : 'POST';
 
     try {
@@ -90,7 +91,7 @@ function WaiterSetupModule() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this waiter?")) {
       try {
-        const res = await fetch(`http://localhost:5000/api/waiters/${id}`, {
+        const res = await fetch(`${BACKEND_URL}/api/waiters/${id}`, {
           method: 'DELETE'
         });
         if (res.ok) {

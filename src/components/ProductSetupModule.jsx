@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './ProductSetupModule.module.css';
+import { BACKEND_URL } from '../config.js';
 
 function ProductSetupModule() {
   const [activeTab, setActiveTab] = useState('entry'); 
@@ -31,7 +32,7 @@ function ProductSetupModule() {
   // அடுத்த குறியீடு, தயாரிப்புகள் மற்றும் தனித்தனி குழுக்களை எடுக்கும் பங்க்ஷன்
   const fetchNextCode = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/products/next-code');
+      const res = await fetch(`${BACKEND_URL}/api/products/next-code`);
       const data = await res.json();
       setFormData(prev => ({ ...prev, product_code: data.nextCode }));
     } catch (err) {
@@ -41,7 +42,7 @@ function ProductSetupModule() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/products');
+      const res = await fetch(`${BACKEND_URL}/api/products`);
       const data = await res.json();
       setProducts(data);
     } catch (err) {
@@ -52,8 +53,8 @@ function ProductSetupModule() {
   const fetchAllGroups = async () => {
     try {
       const [resEn, resTa] = await Promise.all([
-        fetch('http://localhost:5000/api/products/groups-en'),
-        fetch('http://localhost:5000/api/products/groups-ta')
+        fetch(`${BACKEND_URL}/api/products/groups-en`),
+        fetch(`${BACKEND_URL}/api/products/groups-ta`)
       ]);
       const dataEn = await resEn.json();
       const dataTa = await resTa.json();
@@ -88,8 +89,8 @@ function ProductSetupModule() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const url = editingId 
-      ? `http://localhost:5000/api/products/${editingId}` 
-      : 'http://localhost:5000/api/products';
+      ? `${BACKEND_URL}/api/products/${editingId}` 
+      : `${BACKEND_URL}/api/products`;
     const method = editingId ? 'PUT' : 'POST';
 
     try {
@@ -143,7 +144,7 @@ function ProductSetupModule() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
-        const res = await fetch(`http://localhost:5000/api/products/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${BACKEND_URL}/api/products/${id}`, { method: 'DELETE' });
         if (res.ok) {
           alert("Product Deleted Successfully!");
           fetchProducts();

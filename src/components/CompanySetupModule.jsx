@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './CompanySetupModule.module.css'; //[cite: 10]
+import { BACKEND_URL } from '../config.js';
 
 function CompanySetupModule() {
   const [ledgers, setLedgers] = useState([]); //[cite: 10]
@@ -36,7 +37,7 @@ function CompanySetupModule() {
     sales_lang: 'English'         
   });
   //const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-  const BACKEND_URL = 'https://pos-backend-kuog.onrender.com' || 'http://localhost:5000'; // ✅ BACKEND_URL
+ // const BACKEND_URL = 'https://pos-backend-kuog.onrender.com' || 'http://localhost:5000'; // ✅ BACKEND_URL
   // சிஸ்டம் பிரிண்டர் பட்டியலை எடுக்க
   const fetchSystemPrinters = async () => {
     try {

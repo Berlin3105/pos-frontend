@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import { BACKEND_URL } from '../config.js';
 
 function LoginView({ 
   username, 
@@ -41,7 +42,7 @@ function LoginView({
   //   handleLogin(e);
   // };
 
-  const BACKEND_URL = 'https://pos-backend-kuog.onrender.com';
+ // const BACKEND_URL = 'https://pos-backend-kuog.onrender.com';
 
   const onFormSubmit = async (e) => {
     e.preventDefault();

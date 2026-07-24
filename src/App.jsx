@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import LoginView from './components/LoginView';
 import DashboardView from './components/DashboardView'; // Separate page call
+import { BACKEND_URL } from './config.js';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -9,7 +10,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [activeMenu, setActiveMenu] = useState('dashboard');
-  const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+ // const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
   const menuOptions = [
     { id: 'dashboard', label: '📊 Dashboard' },
     { id: 'ledger_setup', label: '🪪 Ledger Setup' },

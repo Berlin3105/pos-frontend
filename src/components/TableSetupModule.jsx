@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './TableSetupModule.module.css';
+import { BACKEND_URL } from '../config.js';
 
 function TableSetupModule() {
   const [activeTab, setActiveTab] = useState('entry'); 
@@ -14,7 +15,7 @@ function TableSetupModule() {
   // அனைத்து டேபிள்களையும் சர்வரில் இருந்து எடுக்க
   const fetchTables = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/tables');
+      const res = await fetch(`${BACKEND_URL}/api/tables`);
       const data = await res.json();
       setTables(data);
     } catch (err) {
@@ -42,8 +43,8 @@ function TableSetupModule() {
     }
 
     const url = isEditing 
-      ? `http://localhost:5000/api/tables/${formData.id}`
-      : 'http://localhost:5000/api/tables';
+      ? `${BACKEND_URL}/api/tables/${formData.id}`
+      : `${BACKEND_URL}/api/tables`;
     const method = isEditing ? 'PUT' : 'POST';
 
     try {
@@ -83,7 +84,7 @@ function TableSetupModule() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this table?")) {
       try {
-        const res = await fetch(`http://localhost:5000/api/tables/${id}`, {
+        const res = await fetch(`${BACKEND_URL}/api/tables/${id}`, {
           method: 'DELETE'
         });
         if (res.ok) {

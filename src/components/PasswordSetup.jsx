@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { BACKEND_URL } from '../config.js';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = `${BACKEND_URL}/api`;
 
 // உங்களுடைய சிஸ்டத்தில் இருக்கும் அனைத்து நேவிகேஷன் மெனுக்களின் பட்டியல்
 const AVAILABLE_MENUS = [
