@@ -4,6 +4,8 @@ const LOCAL_BACKEND = 'http://localhost:5000';
 // Render / Live Backend URL
 const ONLINE_BACKEND = 'https://pos-backend-kuog.onrender.com';
 
+export const LOCAL_PRINTER_BACKEND = 'http://localhost:5000';
+
 // App Type: 'local' OR 'online'
 export const APP_TYPE = 'online'//import.meta.env.VITE_APP_TYPE || 'online'; 
 
