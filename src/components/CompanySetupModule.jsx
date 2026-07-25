@@ -41,7 +41,7 @@ function CompanySetupModule() {
   // சிஸ்டம் பிரிண்டர் பட்டியலை எடுக்க
   const fetchSystemPrinters = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/system-printers`);
+      const res = await fetch('http://localhost:5000/api/system-printers');
       const data = await res.json();
       setSystemPrinters(data);
     } catch (err) { console.error("Error fetching system printers:", err); }
