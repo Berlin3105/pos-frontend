@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import LoginView from './components/LoginView';
-import DashboardView from './components/DashboardView'; // Separate page call
+import DashboardView from './components/DashboardView';
 import { BACKEND_URL } from './config.js';
 
 function App() {
@@ -10,7 +10,16 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [activeMenu, setActiveMenu] = useState('dashboard');
- // const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+  // 1. Dashboard State & Financial Year Filter Setup
+  const [financialYears, setFinancialYears] = useState([]);
+  const [selectedFY, setSelectedFY] = useState('');
+  const [dashboardStats, setDashboardStats] = useState({
+    todayBillCount: 0,
+    todayTotalAmount: "₹0.00",
+    monthwiseSales: []
+  });
+
   const menuOptions = [
     { id: 'dashboard', label: '📊 Dashboard' },
     { id: 'ledger_setup', label: '🪪 Ledger Setup' },
@@ -24,25 +33,54 @@ function App() {
     { id: 'product_sales_report', label: '📈 Productwise Sales' },
     { id: 'waiter_sales_report', label: '📋 Waiterwise Sales' },
     { id: 'hourly_report', label: '🕒 Hourly Report' },
-    { id: 'Password_setup', label: '🕒 Password Setup' },
+    { id: 'Password_setup', label: '🔑 Password Setup' },
   ];
 
-  const dashboardStats = {
-    todayBillCount: 42,
-    todayTotalAmount: "₹18,450.00",
-    monthwiseSales: [
-      { month: 'January', amount: '₹1,20,000' },
-      { month: 'February', amount: '₹1,45,000' },
-      { month: 'March', amount: '₹1,90,000' },
-      { month: 'April', amount: '₹1,65,000' },
-      { month: 'May', amount: '₹2,10,000' },
-      { month: 'June', amount: '₹2,45,000' },
-    ]
+  // 2. Fetch Available Financial Years List
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchFinancialYears();
+    }
+  }, [isLoggedIn]);
+
+  // 3. Fetch Dashboard Stats when Selected FY or Active Menu Changes
+  useEffect(() => {
+    if (isLoggedIn && activeMenu === 'dashboard') {
+      fetchDashboardStats(selectedFY);
+    }
+  }, [isLoggedIn, activeMenu, selectedFY]);
+
+  const fetchFinancialYears = async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/dashboard/financial-years`);
+      if (res.ok) {
+        const years = await res.json();
+        setFinancialYears(years);
+        if (years.length > 0 && !selectedFY) {
+          setSelectedFY(years[0]); // Sets current FY as default
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching financial years:", err);
+    }
+  };
+
+  const fetchDashboardStats = async (fy) => {
+    try {
+      const url = fy ? `${BACKEND_URL}/api/dashboard/stats?fy=${fy}` : `${BACKEND_URL}/api/dashboard/stats`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        setDashboardStats(data);
+      }
+    } catch (err) {
+      console.error("Error fetching dashboard stats:", err);
+    }
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true); // 👈 இங்கிருந்த 'loading(true)' என்பது 'setLoading(true)' ஆக மாற்றப்பட்டுள்ளது!
+    setLoading(true);
     setErrorMessage('');
 
     try {
@@ -79,7 +117,6 @@ function App() {
     setActiveMenu('dashboard');
   };
 
-  // 1. LOGIN VIEW TRIGGER
   if (!isLoggedIn) {
     return (
       <LoginView 
@@ -94,7 +131,6 @@ function App() {
     );
   }
 
-  // 2. DASHBOARD VIEW TRIGGER
   return (
     <DashboardView 
       username={username}
@@ -103,6 +139,9 @@ function App() {
       setActiveMenu={setActiveMenu}
       menuOptions={menuOptions}
       dashboardStats={dashboardStats}
+      financialYears={financialYears}
+      selectedFY={selectedFY}
+      setSelectedFY={setSelectedFY}
     />
   );
 }

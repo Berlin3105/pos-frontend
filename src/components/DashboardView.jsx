@@ -8,10 +8,18 @@ import TableSetupModule from './TableSetupModule';
 import OrderSetupModule from './OrderSetupModule';
 import SalesModule from './SalesModule';
 import PasswordSetup from './PasswordSetup';
-import { BACKEND_URL } from '../config.js';
 
-function DashboardView({ username, handleLogout, activeMenu, setActiveMenu, menuOptions, dashboardStats }) {
-  // மொபைல் மெனுவை கன்ட்ரோல் செய்ய புது ஸ்டேட்
+function DashboardView({ 
+  username, 
+  handleLogout, 
+  activeMenu, 
+  setActiveMenu, 
+  menuOptions, 
+  dashboardStats,
+  financialYears,
+  selectedFY,
+  setSelectedFY
+}) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -20,7 +28,6 @@ function DashboardView({ username, handleLogout, activeMenu, setActiveMenu, menu
       {/* Top Navigation Bar */}
       <header className={styles.header}>
         <div className={styles.logoArea}>
-          {/* மொபைலில் மட்டும் தெரியக்கூடிய Hamburger பட்டன் */}
           <button 
             type="button" 
             className={styles.hamburgerBtn}
@@ -34,7 +41,6 @@ function DashboardView({ username, handleLogout, activeMenu, setActiveMenu, menu
           </h1>
         </div>
         
-        {/* Right User Profiler */}
         <div className={styles.profileArea}>
           <div className={styles.profileFlex}>
             <div className={styles.avatar}>A</div>
@@ -50,13 +56,10 @@ function DashboardView({ username, handleLogout, activeMenu, setActiveMenu, menu
 
       {/* Workspace App Layout */}
       <div className={styles.workspace}>
-        
-        {/* மொபைல் மெனு ஓபனில் இருக்கும் போது பேக்கிரவுண்ட் க்ளிக் செய்யக்கூடிய மூடி (Overlay) */}
         {isMobileMenuOpen && (
           <div className={styles.overlay} onClick={() => setIsMobileMenuOpen(false)}></div>
         )}
 
-        {/* Left Sidebar (Responsive) */}
         <aside className={`${styles.sidebar} ${isMobileMenuOpen ? styles.sidebarOpen : ''}`}>
           <div className={styles.menuSection}>
             <p className={styles.menuHeading}>Navigation Menu</p>
@@ -66,7 +69,7 @@ function DashboardView({ username, handleLogout, activeMenu, setActiveMenu, menu
                   key={option.id}
                   onClick={() => {
                     setActiveMenu(option.id);
-                    setIsMobileMenuOpen(false); // மெனு ஐட்டம் க்ளிக் செய்ததும் மொபைலில் மெனு மூடிவிடும்
+                    setIsMobileMenuOpen(false);
                   }}
                   className={`${styles.menuBtn} ${activeMenu === option.id ? styles.activeMenuBtn : ''}`}
                 >
@@ -80,15 +83,44 @@ function DashboardView({ username, handleLogout, activeMenu, setActiveMenu, menu
           </div>
         </aside>
 
-        {/* Right Workspace Pane */}
+        {/* Main Content Area */}
         <main className={styles.mainPane}>
-          
           {activeMenu === 'dashboard' ? (
             <div className={styles.dashboardGap}>
-              {/* Header Title */}
-              <div className={styles.pageHeader}>
-                <h2>Business Overview</h2>
-                <p>Real-time point of sale matrix accumulations.</p>
+              
+              {/* Header Title & Financial Year Dropdown */}
+              <div className={styles.pageHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                <div>
+                  <h2>Business Overview</h2>
+                  <p>Real-time point of sale matrix accumulations.</p>
+                </div>
+
+                {/* Financial Year Selection Dropdown */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <label htmlFor="fySelect" style={{ fontSize: '12px', fontWeight: 'bold', color: '#475569' }}>
+                    📅 Financial Year:
+                  </label>
+                  <select 
+                    id="fySelect"
+                    value={selectedFY} 
+                    onChange={(e) => setSelectedFY(e.target.value)}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      fontWeight: 'bold',
+                      color: '#0f172a',
+                      backgroundColor: '#ffffff',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {financialYears && financialYears.map((fy) => (
+                      <option key={fy} value={fy}>
+                        FY {fy}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {/* Counters Metrics Grid Layout */}
@@ -114,14 +146,14 @@ function DashboardView({ username, handleLogout, activeMenu, setActiveMenu, menu
                 </div>
               </div>
 
-              {/* Monthwise Grouped Reports Panel */}
+              {/* Monthwise Grouped Reports Panel (April to March Order) */}
               <div className={styles.panel}>
                 <div className={styles.panelHeader}>
-                  <h3>📅 Monthwise Sales Report</h3>
+                  <h3>📅 Monthwise Sales Report ({selectedFY})</h3>
                 </div>
 
                 <div className={styles.monthsGrid}>
-                  {dashboardStats.monthwiseSales.map((item, index) => (
+                  {dashboardStats.monthwiseSales && dashboardStats.monthwiseSales.map((item, index) => (
                     <div key={index} className={styles.monthBlock}>
                       <div>
                         <h4>{item.month}</h4>
@@ -155,7 +187,6 @@ function DashboardView({ username, handleLogout, activeMenu, setActiveMenu, menu
           ): activeMenu === 'Password_setup' ? ( 
               <PasswordSetup />
           ): (
-            /* Other Screens Setup Holder */
             <div className={styles.placeholderContainer}>
               <span className={styles.placeholderIcon}>🛠️</span>
               <h3 className={styles.placeholderTitle}>
@@ -166,7 +197,6 @@ function DashboardView({ username, handleLogout, activeMenu, setActiveMenu, menu
               </p>
             </div>
           )}
-
         </main>
       </div>
     </div>
