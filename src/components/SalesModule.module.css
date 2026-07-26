@@ -489,3 +489,97 @@
   }
 }
 
+/* 📱 Mobile Responsive CSS for Sales Module */
+@media (max-width: 768px) {
+  .salesHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tabGroup {
+    flex-wrap: wrap;
+  }
+
+  .tabGroup button {
+    flex: 1;
+    text-align: center;
+    font-size: 0.8rem;
+    padding: 8px 6px;
+  }
+
+  .filterBar {
+    flex-direction: column;
+  }
+
+  .filterBtn {
+    width: 100%;
+    padding: 10px;
+  }
+
+  /* 📱 Table Layout -> Mobile Cards Structure */
+  .listTable, 
+  .listTable thead, 
+  .listTable tbody, 
+  .listTable th, 
+  .listTable td, 
+  .listTable tr {
+    display: block;
+  }
+
+  /* Header-ஐ மறைத்தல் */
+  .listTable thead {
+    display: none;
+  }
+
+  .listTable tr {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    padding: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .listTable td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed #f1f5f9;
+    font-size: 0.9rem;
+    text-align: right;
+  }
+
+  .listTable td:last-child {
+    border-bottom: none;
+    padding-top: 10px;
+  }
+
+  /* Data Labels - Cell content-க்கு முன்னால் Heading காட்டுவதற்கு */
+  .listTable td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #64748b;
+    text-align: left;
+    margin-right: 10px;
+  }
+
+  .actionTd {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .actionTd::before {
+    display: none; /* Action Buttons-க்கு Label தேவையில்லை */
+  }
+
+  .btnEdit, .btnPrint, .btnDelete {
+    flex: 1;
+    padding: 8px 4px;
+    margin: 0 !important;
+    font-size: 0.8rem;
+  }
+}
+

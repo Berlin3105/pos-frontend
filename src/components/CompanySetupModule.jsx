@@ -39,14 +39,19 @@ function CompanySetupModule() {
   //const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
  // const BACKEND_URL = 'https://pos-backend-kuog.onrender.com' || 'http://localhost:5000'; // ✅ BACKEND_URL
   // சிஸ்டம் பிரிண்டர் பட்டியலை எடுக்க
-  const fetchSystemPrinters = async () => {
-    try {
-      const res = await fetch(`${LOCAL_PRINTER_BACKEND}/api/system-printers`);
-
-      const data = await res.json();
-      setSystemPrinters(data);
-    } catch (err) { console.error("Error fetching system printers:", err); }
-  };
+  // சிஸ்டம் பிரிண்டர் பட்டியலை எடுக்க
+const fetchSystemPrinters = async () => {
+  try {
+    // 💻 லோக்கலில் ஓடும் Backend (Port 5000)-ல் இருந்து பிரிண்டர்களை நேரடியாக எடுக்கிறோம்
+    const res = await fetch("http://localhost:5000/api/system-printers");
+    if (!res.ok) throw new Error("Failed to fetch local printers");
+    const data = await res.json();
+    console.log("Printers found:", data);
+    setSystemPrinters(data);
+  } catch (err) { 
+    console.error("Error fetching system printers:", err);
+  }
+};
 
   const fetchLedgers = async () => { //[cite: 10]
     try {

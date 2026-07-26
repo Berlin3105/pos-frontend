@@ -276,14 +276,16 @@ function SalesModule() {
               ) : (
                 salesList.map((s) => (
                   <tr key={s.id}>
-                    <td><strong>{s.bill_no}</strong></td>
-                    <td>{new Date(s.sales_date).toLocaleString()}</td>
-                    <td>{s.token_no || 'Counter'}</td>
-                    <td>{s.table_no}</td>
-                    <td>{s.payment_mode}</td>
-                    <td>₹{Number(s.net_payable).toFixed(2)}</td>
+                    {/* data-label சேர்க்கப்பட்டுள்ளது 👇 */}
+                    <td data-label="Bill No"><strong>{s.bill_no}</strong></td>
+                    <td data-label="Date">{new Date(s.sales_date).toLocaleString()}</td>
+                    <td data-label="Token">{s.token_no || 'Counter'}</td>
+                    <td data-label="Table">{s.table_no || 'N/A'}</td>
+                    <td data-label="Mode">{s.payment_mode}</td>
+                    <td data-label="Net Total" style={{ color: '#16a34a', fontWeight: 'bold' }}>
+                      ₹{Number(s.net_payable).toFixed(2)}
+                    </td>
                     <td className={styles.actionTd}>
-                      {/* Edit Button சேர்க்கப்பட்டுள்ளது */}
                       <button onClick={() => handleEditSales(s)} className={styles.btnEdit}>✏️ Edit</button>
                       <button onClick={() => handleReprintSales(s.id)} className={styles.btnPrint}>🖨️ Print</button>
                       <button onClick={() => handleDeleteSales(s.id)} className={styles.btnDelete}>🗑️ Delete</button>
