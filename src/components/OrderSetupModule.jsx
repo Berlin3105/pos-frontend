@@ -586,6 +586,7 @@ function OrderSetupModule() {
               🔄 Load Data
             </button>
           </div>
+          
           <table className={styles.orderTable}>
             <thead>
               <tr>
@@ -602,14 +603,15 @@ function OrderSetupModule() {
             <tbody>
               {ordersList.map(o => (
                 <tr key={o.id}>
-                  <td>{o.order_pfx}{o.order_no}</td>
-                  <td><mark><b>{o.token_no}</b></mark></td>
-                  <td>{o.order_date} | {o.order_time}</td>
-                  <td>{o.waiter_name || 'Unknown'}</td>
-                  <td>{o.table_no ? `Table ${o.table_no}` : 'N/A'}</td>
-                  <td>{o.order_type}</td>
-                  <td><strong>₹{o.net_value}</strong></td>
-                  <td>
+                  {/* data-label ப்ராப்பர்ட்டிகள் சேர்க்கப்பட்டுள்ளன 👇 */}
+                  <td data-label="Order No"><strong>{o.order_pfx}{o.order_no}</strong></td>
+                  <td data-label="Token No"><mark><b>{o.token_no}</b></mark></td>
+                  <td data-label="Date / Time">{o.order_date} | {o.order_time}</td>
+                  <td data-label="Waiter">{o.waiter_name || 'Unknown'}</td>
+                  <td data-label="Table">{o.table_no ? `Table ${o.table_no}` : 'N/A'}</td>
+                  <td data-label="Type">{o.order_type}</td>
+                  <td data-label="Net Value" style={{ color: '#16a34a', fontWeight: 'bold' }}>₹{o.net_value}</td>
+                  <td className={styles.actionTd}>
                     <button onClick={() => startEditOrder(o.id)} className={styles.btnListEdit} style={{marginRight: '6px', background: '#eab308', color:'white', border:'none', padding:'4px 8px', cursor:'pointer'}}>Edit</button>
                     <button onClick={() => deleteOrder(o.id)} className={styles.btnListDel}>Delete</button>
                   </td>

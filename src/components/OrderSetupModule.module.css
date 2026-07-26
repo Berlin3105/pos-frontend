@@ -373,3 +373,98 @@
     padding: 0.85rem 0.25rem;
   }
 }
+
+/* 📱 Mobile Responsive CSS for Orders List */
+@media (max-width: 768px) {
+  /* Filter Container Responsive Layout */
+  .listContainer > div:first-child {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .listContainer > div:first-child > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .listContainer > div:first-child input[type="date"] {
+    width: 60%;
+  }
+
+  .listContainer > div:first-child button {
+    width: 100%;
+    padding: 10px !important;
+  }
+
+  /* 📱 Table Layout -> Mobile Cards Structure */
+  .orderTable, 
+  .orderTable thead, 
+  .orderTable tbody, 
+  .orderTable th, 
+  .orderTable td, 
+  .orderTable tr {
+    display: block;
+  }
+
+  /* Table Header-ஐ மறைத்தல் */
+  .orderTable thead {
+    display: none;
+  }
+
+  /* ஒவ்வொரு ஆர்டரையும் தனி கார்டாக மாற்றுதல் */
+  .orderTable tr {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    padding: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .orderTable td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed #f1f5f9;
+    font-size: 0.9rem;
+    text-align: right;
+  }
+
+  .orderTable td:last-child {
+    border-bottom: none;
+    padding-top: 10px;
+  }
+
+  /* Cell content-க்கு முன்னால் Heading Label காட்டுவதற்கு */
+  .orderTable td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #64748b;
+    text-align: left;
+    margin-right: 10px;
+  }
+
+  /* Action Buttons (Edit, Delete) Alignments */
+  .actionTd {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .actionTd::before {
+    display: none; /* Buttons-க்கு Label தேவையில்லை */
+  }
+
+  .btnListEdit, .btnListDel {
+    flex: 1;
+    padding: 8px 4px !important;
+    margin: 0 !important;
+    font-size: 0.85rem;
+    text-align: center;
+    border-radius: 4px;
+  }
+}
