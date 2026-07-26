@@ -102,7 +102,7 @@ function DashboardView({
                   </label>
                   <select 
                     id="fySelect"
-                    value={selectedFY} 
+                    value={selectedFY || ''} 
                     onChange={(e) => setSelectedFY(e.target.value)}
                     style={{
                       padding: '6px 12px',
@@ -114,11 +114,15 @@ function DashboardView({
                       cursor: 'pointer'
                     }}
                   >
-                    {financialYears && financialYears.map((fy) => (
-                      <option key={fy} value={fy}>
-                        FY {fy}
-                      </option>
-                    ))}
+                    {financialYears && financialYears.length > 0 ? (
+                      financialYears.map((fy) => (
+                        <option key={fy} value={fy}>
+                          FY {fy}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="">Loading...</option>
+                    )}
                   </select>
                 </div>
               </div>

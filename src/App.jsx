@@ -11,14 +11,37 @@ function App() {
   const [errorMessage, setErrorMessage] = useState('');
   const [activeMenu, setActiveMenu] = useState('dashboard');
 
-  // 1. Dashboard State & Financial Year Filter Setup
   const [financialYears, setFinancialYears] = useState([]);
   const [selectedFY, setSelectedFY] = useState('');
   const [dashboardStats, setDashboardStats] = useState({
     todayBillCount: 0,
-    todayTotalAmount: "₹0.00",
+    todayTotalAmount: '₹0.00',
     monthwiseSales: []
   });
+
+  // 1. Fetch Financial Years
+  useEffect(() => {
+    fetch(`${BACKEND_URL}/api/dashboard/financial-years`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setFinancialYears(data);
+          setSelectedFY(data[0]); // First Year Default Set
+        }
+      })
+      .catch(err => console.error(err));
+  }, []);
+
+  // 2. Fetch Dashboard Stats when Selected FY changes
+  useEffect(() => {
+    if (!selectedFY) return;
+
+    fetch(`${BACKEND_URL}/api/dashboard/stats?fy=${selectedFY}`)
+      .then(res => res.json())
+      .then(data => setDashboardStats(data))
+      .catch(err => console.error(err));
+  }, [selectedFY]);
+
 
   const menuOptions = [
     { id: 'dashboard', label: '📊 Dashboard' },
