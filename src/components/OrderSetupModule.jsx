@@ -273,11 +273,11 @@ function OrderSetupModule() {
       if (res.ok) {
         const resData = await res.json();
         
-        // 💡 பில் நம்பருக்கு பதிலாக டேட்டாபேஸில் இருந்து வரும் சரியான Token No-வை பெறுகிறோம்
-        const currentTokenNo = resData.token_no || resData.tokenNo || resData.order?.token_no || '001';
+        // 💡 backend-ல் இருந்து வரும் சரியான Token No-வை எடுக்கிறோம்
+        const currentTokenNo = resData.token_no || resData.tokenNo || '001';
 
         if (isPrint) {
-          handleBrowserPrint(currentTokenNo);
+          handleBrowserPrint(currentTokenNo); // 👈 Correct token number passed here
         } else {
           alert("Order Saved Successfully!");
         }
@@ -449,20 +449,20 @@ function OrderSetupModule() {
     `;
 
     // 🚀 1. Customer Bill விண்டோ திறத்தல்
-    const custWindow = window.open('', 'CustomerBillWindow', 'width=400,height=600');
-    if (custWindow) {
-      custWindow.document.write(custHtml);
-      custWindow.document.close();
-      custWindow.focus();
-      setTimeout(() => {
-        custWindow.print();
-        custWindow.close();
-      }, 500);
-    }
+    const custWindow = window.open('', '_blank', 'width=400,height=600');
+      if (custWindow) {
+        custWindow.document.write(custHtml);
+        custWindow.document.close();
+        custWindow.focus();
+        setTimeout(() => {
+          custWindow.print();
+          custWindow.close();
+        }, 500);
+      }
 
-    // 🚀 2. Kitchen KOT விண்டோ திறத்தல் (300ms தாமதத்துடன்)
+    // 🚀 2. Kitchen KOT விண்டோ திறத்தல் (1 விநாடி தாமதத்துடன்)
     setTimeout(() => {
-      const kotWindow = window.open('', 'KitchenKotWindow', 'width=400,height=600');
+      const kotWindow = window.open('', '_blank', 'width=400,height=600');
       if (kotWindow) {
         kotWindow.document.write(kotHtml);
         kotWindow.document.close();
