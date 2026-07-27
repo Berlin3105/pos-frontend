@@ -42,14 +42,14 @@ function CompanySetupModule() {
   // சிஸ்டம் பிரிண்டர் பட்டியலை எடுக்க
 const fetchSystemPrinters = async () => {
   try {
-    // 💻 லோக்கலில் ஓடும் Backend (Port 5000)-ல் இருந்து பிரிண்டர்களை நேரடியாக எடுக்கிறோம்
-    const res = await fetch("http://localhost:5000/api/system-printers");
+    const res = await fetch(`${LOCAL_PRINTER_BACKEND || 'http://localhost:5000'}/api/system-printers`);
     if (!res.ok) throw new Error("Failed to fetch local printers");
     const data = await res.json();
-    console.log("Printers found:", data);
     setSystemPrinters(data);
   } catch (err) { 
     console.error("Error fetching system printers:", err);
+    // Local Printer Server ஓடவில்லை என்றால் default விருப்பத்தை சேர்க்கலாம்
+    setSystemPrinters(["Default Printer", "Browser Default Popup"]);
   }
 };
 

@@ -261,7 +261,7 @@ function OrderSetupModule() {
       gst_value: gstValue,
       net_value: netValue,
       items: cartItems,
-      is_print: isPrint 
+      is_print: false // Backend silent print-ஐ தவிர்க்க false தருகிறோம்
     };
 
     try {
@@ -275,13 +275,77 @@ function OrderSetupModule() {
       });
 
       if (res.ok) {
-        alert(isPrint ? "Order Saved & Printed Successfully!" : "Order Saved Successfully (Without Print)!");
+        if (isPrint) {
+          // Browser Print Popup-ஐ ஓபன் செய்யும் ஃபங்க்ஷன்
+          handleBrowserPrint();
+        } else {
+          alert("Order Saved Successfully!");
+        }
         resetPOS();
         setActiveTab('list');
       }
     } catch (err) {
       console.error("Error saving order:", err);
     }
+  };
+
+  // 🖨️ Browser Printer Popup Triggers
+  const handleBrowserPrint = () => {
+    const printWindow = window.open('', '', 'width=400,height=600');
+    
+    const printHtml = `
+      <html>
+        <head>
+          <title>Order Receipt</title>
+          <style>
+            body { font-family: monospace; padding: 10px; width: 280px; }
+            .center { text-align: center; }
+            .right { text-align: right; }
+            .line { border-bottom: 1px dashed #000; margin: 5px 0; }
+            table { width: 100%; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="center">
+            <h2>RECEIPT</h2>
+            <p>Order No: ${orderPfx}${orderNo}</p>
+          </div>
+          <div class="line"></div>
+          <table>
+            <thead>
+              <tr>
+                <th align="left">Item</th>
+                <th align="right">Qty</th>
+                <th align="right">Amt</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${cartItems.map(item => `
+                <tr>
+                  <td>${item.product_name}</td>
+                  <td align="right">${item.qty}</td>
+                  <td align="right">₹${item.value.toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="line"></div>
+          <div class="right">
+            <strong>Net Total: ₹${netValue.toFixed(2)}</strong>
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printHtml);
+    printWindow.document.close();
+    printWindow.focus();
+    
+    // 💡 Browser Print Dialogue-ஐ திறக்கும்
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
   };
 
   const resetPOS = () => {
