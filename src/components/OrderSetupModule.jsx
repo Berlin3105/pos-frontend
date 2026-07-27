@@ -304,178 +304,175 @@ function OrderSetupModule() {
 
     const totalQty = cartItems.reduce((sum, item) => sum + Number(item.qty), 0);
 
-  // 📄 1. CUSTOMER BILL PRINT (தனி PDF Window)
-    const printCustomerBill = () => {
-      const custWindow = window.open('', '_blank', 'width=400,height=600');
-      const custHtml = `
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <title>CUSTOMER BILL</title>
-            <style>
-              @import url('https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;700&display=swap');
-              body { width: 280px; margin: 0; padding: 5px; font-family: 'Hind Madurai', monospace, sans-serif; font-size: 13px; color: #000; }
-              .center { text-align: center; }
-              .bold { font-weight: bold; }
-              .title { font-size: 18px; margin-bottom: 2px; text-transform: uppercase; }
-              .subtitle { font-size: 12px; margin-bottom: 10px; }
-              .line { border-top: 1px dashed #000; margin: 5px 0; }
-              .info-table, .items-table { width: 100%; border-collapse: collapse; }
-              .info-table td { padding: 2px 0; font-size: 12px; }
-              .items-table th { border-bottom: 1px dashed #000; text-align: left; padding: 4px 0; font-size: 12px; }
-              .items-table td { padding: 4px 0; vertical-align: top; }
-              .right { text-align: right; }
-              .total-section { font-size: 14px; margin-top: 5px; }
-            </style>
-          </head>
-          <body>
-            <div class="center">
-              <span class="bold title">${companyName}</span><br/>
-              <span class="subtitle">${address1} ${address2}</span>
-              ${gstNo ? `<br/><span class="subtitle">GSTIN: ${gstNo}</span>` : ''}
-            </div>
-            <div class="line"></div>
-            <table class="info-table">
+    // 📄 HTML Templates
+    const custHtml = `
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>CUSTOMER BILL</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;700&display=swap');
+            body { width: 280px; margin: 0; padding: 5px; font-family: 'Hind Madurai', monospace, sans-serif; font-size: 13px; color: #000; }
+            .center { text-align: center; }
+            .bold { font-weight: bold; }
+            .title { font-size: 18px; margin-bottom: 2px; text-transform: uppercase; }
+            .subtitle { font-size: 12px; margin-bottom: 10px; }
+            .line { border-top: 1px dashed #000; margin: 5px 0; }
+            .info-table, .items-table { width: 100%; border-collapse: collapse; }
+            .info-table td { padding: 2px 0; font-size: 12px; }
+            .items-table th { border-bottom: 1px dashed #000; text-align: left; padding: 4px 0; font-size: 12px; }
+            .items-table td { padding: 4px 0; vertical-align: top; }
+            .right { text-align: right; }
+            .total-section { font-size: 14px; margin-top: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="center">
+            <span class="bold title">${companyName}</span><br/>
+            <span class="subtitle">${address1} ${address2}</span>
+            ${gstNo ? `<br/><span class="subtitle">GSTIN: ${gstNo}</span>` : ''}
+          </div>
+          <div class="line"></div>
+          <table class="info-table">
+            <tr>
+              <td><b>Order No:</b> ${orderPfx}${orderNo}</td>
+              <td class="right"><b>Table:</b> ${tableObj ? 'Table ' + tableObj.table_no : 'N/A'}</td>
+            </tr>
+            <tr>
+              <td><b>Date:</b> ${currentDate}</td>
+              <td class="right"><b>Time:</b> ${currentTime}</td>
+            </tr>
+            <tr>
+              <td><b>Waiter:</b> ${waiterObj ? waiterObj.waiter_name : 'N/A'}</td>
+            </tr>
+            <tr>
+              <td class="right" colspan="2"><span style="font-size: 14px; font-weight: bold; border: 1px solid #000; padding: 1px 4px;">TOKEN: ${tokenNo}</span></td>
+            </tr>
+          </table>
+          <div class="line"></div>
+          <table class="items-table">
+            <thead>
               <tr>
-                <td><b>Order No:</b> ${orderPfx}${orderNo}</td>
-                <td class="right"><b>Table:</b> ${tableObj ? 'Table ' + tableObj.table_no : 'N/A'}</td>
+                <th style="width: 50%;">Item</th>
+                <th class="right" style="width: 20%;">Qty</th>
+                <th class="right" style="width: 30%;">Amount</th>
               </tr>
-              <tr>
-                <td><b>Date:</b> ${currentDate}</td>
-                <td class="right"><b>Time:</b> ${currentTime}</td>
-              </tr>
-              <tr>
-                <td><b>Waiter:</b> ${waiterObj ? waiterObj.waiter_name : 'N/A'}</td>
-              </tr>
-              <tr>
-                <td class="right" colspan="2"><span style="font-size: 14px; font-weight: bold; border: 1px solid #000; padding: 1px 4px;">TOKEN: ${tokenNo}</span></td>
-              </tr>
-            </table>
-            <div class="line"></div>
-            <table class="items-table">
-              <thead>
+            </thead>
+            <tbody>
+              ${cartItems.map(item => `
                 <tr>
-                  <th style="width: 50%;">Item</th>
-                  <th class="right" style="width: 20%;">Qty</th>
-                  <th class="right" style="width: 30%;">Amount</th>
+                  <td>${item.product_name}</td>
+                  <td class="right">${item.qty}</td>
+                  <td class="right">₹${Number(item.value).toFixed(2)}</td>
                 </tr>
-              </thead>
-              <tbody>
-                ${cartItems.map(item => `
-                  <tr>
-                    <td>${item.product_name}</td>
-                    <td class="right">${item.qty}</td>
-                    <td class="right">₹${Number(item.value).toFixed(2)}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-            <div class="line"></div>
-            <table class="info-table total-section">
-              <tr class="bold">
-                <td>Total Qty: ${totalQty}</td>
-                <td class="right">Gross: ₹${grossValue.toFixed(2)}</td>
-              </tr>
-              ${gstValue > 0 ? `
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="line"></div>
+          <table class="info-table total-section">
+            <tr class="bold">
+              <td>Total Qty: ${totalQty}</td>
+              <td class="right">Gross: ₹${grossValue.toFixed(2)}</td>
+            </tr>
+            ${gstValue > 0 ? `
+            <tr>
+              <td></td>
+              <td class="right">GST (${gstPercent}%): ₹${gstValue.toFixed(2)}</td>
+            </tr>` : ''}
+            <tr class="bold" style="font-size: 15px;">
+              <td></td>
+              <td class="right">NET TOTAL: ₹${netValue.toFixed(2)}</td>
+            </tr>
+          </table>
+          <div class="line"></div>
+          <div class="center bold" style="margin-top: 8px; font-size: 11px;">
+            ~ Thank You! Visit Again ~
+          </div>
+        </body>
+      </html>
+    `;
+
+    const kotHtml = `
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>KITCHEN KOT</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;700&display=swap');
+            body { width: 280px; margin: 0; padding: 5px; font-family: 'Hind Madurai', monospace, sans-serif; font-size: 13px; color: #000; }
+            .center { text-align: center; }
+            .bold { font-weight: bold; }
+            .title { font-size: 18px; margin-bottom: 2px; text-transform: uppercase; }
+            .line { border-top: 1px dashed #000; margin: 5px 0; }
+            .info-table, .items-table { width: 100%; border-collapse: collapse; }
+            .info-table td { padding: 2px 0; font-size: 12px; }
+            .items-table th { border-bottom: 1px dashed #000; text-align: left; padding: 4px 0; font-size: 12px; }
+            .items-table td { padding: 4px 0; vertical-align: top; }
+            .right { text-align: right; }
+          </style>
+        </head>
+        <body>
+          <div class="center">
+            <span class="bold title">** KOT / KITCHEN **</span><br/>
+            <span style="font-size:16px; font-weight:bold; background:#000; color:#fff; padding:2px 5px;">Token No: ${tokenNo}</span> 
+          </div>
+          <div class="line"></div>
+          <table class="info-table">
+            <tr><td><b>Order No:</b> ${orderPfx}${orderNo}</td><td class="right"><b>Table:</b> ${tableObj ? 'Table ' + tableObj.table_no : 'N/A'}</td></tr>
+            <tr><td><b>Date:</b> ${currentDate}</td><td class="right"><b>Time:</b> ${currentTime}</td></tr>
+            <tr><td colspan="2"><b>Waiter:</b> ${waiterObj ? waiterObj.waiter_name : 'N/A'}</td></tr>
+          </table>
+          <div class="line"></div>
+          <table class="items-table">
+            <thead>
               <tr>
-                <td></td>
-                <td class="right">GST (${gstPercent}%): ₹${gstValue.toFixed(2)}</td>
-              </tr>` : ''}
-              <tr class="bold" style="font-size: 15px;">
-                <td></td>
-                <td class="right">NET TOTAL: ₹${netValue.toFixed(2)}</td>
+                <th style="width: 25%;">Qty</th>
+                <th style="width: 75%;">Item Name</th>
               </tr>
-            </table>
-            <div class="line"></div>
-            <div class="center bold" style="margin-top: 8px; font-size: 11px;">
-              ~ Thank You! Visit Again ~
-            </div>
-          </body>
-        </html>
-      `;
+            </thead>
+            <tbody>
+              ${cartItems.map(item => `
+                <tr>
+                  <td class="bold" style="font-size: 16px;">${item.qty}</td>
+                  <td>${item.product_name}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="line"></div>
+          <table class="info-table">
+            <tr class="bold"><td>TOTAL QTY: ${totalQty}</td></tr>
+          </table>
+          <div class="line"></div>
+        </body>
+      </html>
+    `;
+
+    // 🚀 1. Customer Bill விண்டோ திறத்தல்
+    const custWindow = window.open('', 'CustomerBillWindow', 'width=400,height=600');
+    if (custWindow) {
       custWindow.document.write(custHtml);
       custWindow.document.close();
       custWindow.focus();
       setTimeout(() => {
         custWindow.print();
         custWindow.close();
-      }, 400);
-    };
+      }, 500);
+    }
 
-    // 📄 2. KITCHEN KOT PRINT (தனி PDF Window)
-    const printKitchenKOT = () => {
-      const kotWindow = window.open('', '_blank', 'width=400,height=600');
-      const kotHtml = `
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <title>KITCHEN KOT</title>
-            <style>
-              @import url('https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;700&display=swap');
-              body { width: 280px; margin: 0; padding: 5px; font-family: 'Hind Madurai', monospace, sans-serif; font-size: 13px; color: #000; }
-              .center { text-align: center; }
-              .bold { font-weight: bold; }
-              .title { font-size: 18px; margin-bottom: 2px; text-transform: uppercase; }
-              .line { border-top: 1px dashed #000; margin: 5px 0; }
-              .info-table, .items-table { width: 100%; border-collapse: collapse; }
-              .info-table td { padding: 2px 0; font-size: 12px; }
-              .items-table th { border-bottom: 1px dashed #000; text-align: left; padding: 4px 0; font-size: 12px; }
-              .items-table td { padding: 4px 0; vertical-align: top; }
-              .right { text-align: right; }
-            </style>
-          </head>
-          <body>
-            <div class="center">
-              <span class="bold title">** KOT / KITCHEN **</span><br/>
-              <span style="font-size:16px; font-weight:bold; background:#000; color:#fff; padding:2px 5px;">Token No: ${tokenNo}</span> 
-            </div>
-            <div class="line"></div>
-            <table class="info-table">
-              <tr><td><b>Order No:</b> ${orderPfx}${orderNo}</td><td class="right"><b>Table:</b> ${tableObj ? 'Table ' + tableObj.table_no : 'N/A'}</td></tr>
-              <tr><td><b>Date:</b> ${currentDate}</td><td class="right"><b>Time:</b> ${currentTime}</td></tr>
-              <tr><td colspan="2"><b>Waiter:</b> ${waiterObj ? waiterObj.waiter_name : 'N/A'}</td></tr>
-            </table>
-            <div class="line"></div>
-            <table class="items-table">
-              <thead>
-                <tr>
-                  <th style="width: 25%;">Qty</th>
-                  <th style="width: 75%;">Item Name</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${cartItems.map(item => `
-                  <tr>
-                    <td class="bold" style="font-size: 16px;">${item.qty}</td>
-                    <td>${item.product_name}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-            <div class="line"></div>
-            <table class="info-table">
-              <tr class="bold"><td>TOTAL QTY: ${totalQty}</td></tr>
-            </table>
-            <div class="line"></div>
-          </body>
-        </html>
-      `;
-      kotWindow.document.write(kotHtml);
-      kotWindow.document.close();
-      kotWindow.focus();
-      setTimeout(() => {
-        kotWindow.print();
-        kotWindow.close();
-      }, 400);
-    };
-
-    // முதலாவதாக Customer Bill பிரிண்ட் விண்டோ திறக்கும்
-    printCustomerBill();
-
-    // சிறிய இடைவெளியில் Kitchen KOT பிரிண்ட் விண்டோ தனியாகத் திறக்கும்
+    // 🚀 2. Kitchen KOT விண்டோ திறத்தல் (300ms தாமதத்துடன்)
     setTimeout(() => {
-      printKitchenKOT();
-    }, 400);
+      const kotWindow = window.open('', 'KitchenKotWindow', 'width=400,height=600');
+      if (kotWindow) {
+        kotWindow.document.write(kotHtml);
+        kotWindow.document.close();
+        kotWindow.focus();
+        setTimeout(() => {
+          kotWindow.print();
+          kotWindow.close();
+        }, 500);
+      }
+    }, 1000);
   };
 
   const resetPOS = () => {
