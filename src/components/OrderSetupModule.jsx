@@ -28,7 +28,7 @@ function OrderSetupModule() {
   const [numPadValue, setNumPadValue] = useState('');
   const [gstPercent, setGstPercent] = useState(5); 
 
-  // கம்பெனி விபரங்கள் ஸ்டேட் (server.js -இல் உள்ளவாறு தலைப்பு/முகவரி காட்ட)
+  // கம்பெனி விபரங்கள் ஸ்டேட்
   const [company, setCompany] = useState(null);
 
   // இன்னைய தேதியை YYYY-MM-DD வடிவில் பெற
@@ -56,8 +56,8 @@ function OrderSetupModule() {
     }
   };
 
- // ==========================================
-  // ⚡ 100% கச்சிதமான அட்மின் & லிங்க்டு வெயிட்டர் லாஜிக்
+  // ==========================================
+  // ⚡ அட்மின் & லிங்க்டு வெயிட்டர் லாஜிக்
   // ==========================================
   const displayedWaiters = waiters.filter(w => {
     if (!currentUser) return false;
@@ -65,7 +65,6 @@ function OrderSetupModule() {
     const loggedInUser = (currentUser.username || '').toString().trim().toLowerCase();
     const userRole = (currentUser.role || '').toString().trim().toLowerCase();
 
-    // 🔗 கண்டிஷன் 1: முதலிடம் 'linked_waiters'-க்கு! (அட்மினாக இருந்தாலும் ஐடி இருந்தால் அதுமட்டுமே காட்டும்)
     if (currentUser.linked_waiters && currentUser.linked_waiters !== 'null' && currentUser.linked_waiters !== '') {
       let linkedIds = [];
       if (Array.isArray(currentUser.linked_waiters)) {
@@ -84,12 +83,10 @@ function OrderSetupModule() {
       }
     }
 
-    // 👑 கண்டிஷன் 2: linked_waiters காலியாக இருந்து, ரோல் அல்லது பெயர் 'admin' ஆக இருந்தால் எல்லாரும் லோடு ஆவார்கள்
     if (userRole === 'admin' || loggedInUser === 'admin') {
       return true; 
     }
 
-    // 🤵 கண்டிஷன் 3: சாதாரண ஆபரேட்டராக இருந்து linked_waiters காலியாக இருந்தால், அவர் பெயரில் உள்ளவர் மட்டும் வருவார்
     if (loggedInUser && w.waiter_name) {
       return w.waiter_name.toLowerCase() === loggedInUser;
     }
@@ -97,17 +94,14 @@ function OrderSetupModule() {
     return false;
   });
 
-  // 1. முதலாவது useEffect - லோக்கல் ஸ்டோரேஜ் மற்றும் API டேட்டாவை லோடு செய்கிறது
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
-    console.log("=== LOCALSTORAGE USER ===", storedUser); 
     if (storedUser) {
       setCurrentUser(JSON.parse(storedUser));
     }
     fetchInitialData();
   }, []);
 
-  // 2. ஆட்டோ செலக்ட் லாஜிக் (பில்டருக்கு கீழே வைக்கப்பட்டுள்ளது)
   useEffect(() => {
     if (displayedWaiters.length > 0 && !selectedWaiter) {
       setSelectedWaiter(Number(displayedWaiters[0].id));
@@ -133,7 +127,6 @@ function OrderSetupModule() {
 
   const [orderPfx] = useState(getFinancialYearPrefix());
 
-  // AC/NON_AC மாறும்போது கார்ட் விலைகளை மாற்றுவது
   useEffect(() => {
     const updatedCart = cartItems.map(item => {
       const origProd = products.find(p => p.id === item.product_id);
@@ -145,7 +138,6 @@ function OrderSetupModule() {
     });
     setCartItems(updatedCart);
   }, [orderType]);
-
 
   const fetchInitialData = async () => {
     try {
@@ -159,7 +151,6 @@ function OrderSetupModule() {
       const tRes = await fetch(`${BACKEND_URL}/api/tables`);
       setTables(await tRes.json());
 
-      // 👇 இங்க உங்க தற்போதைய தேதி பாஸ் பண்ணி கரண்ட் டேட்டா மட்டும் எடுக்கிறோம்
       const todayStr = getTodayDateString();
       const oRes = await fetch(`${BACKEND_URL}/api/orders?from_date=${todayStr}&to_date=${todayStr}`);
       setOrdersList(await oRes.json());
@@ -172,7 +163,6 @@ function OrderSetupModule() {
       setProducts(productData);
       setFilteredProducts(productData); 
 
-      // கம்பெனி விபரங்களை பெற
       const compRes = await fetch(`${BACKEND_URL}/api/companies/single`);
       if (compRes.ok) {
         setCompany(await compRes.json());
@@ -269,7 +259,7 @@ function OrderSetupModule() {
       gst_value: gstValue,
       net_value: netValue,
       items: cartItems,
-      is_print: false // Backend silent print-ஐ தவிர்க்க false தருகிறோம்
+      is_print: false
     };
 
     try {
@@ -285,7 +275,6 @@ function OrderSetupModule() {
       if (res.ok) {
         const resData = await res.json();
         if (isPrint) {
-          // server.js -இல் உள்ள அதே ஸ்டைல் படி பில் மற்றும் KOT பிரின்ட் எடுக்கப்படுகிறது
           handleBrowserPrint(resData.token_no || '001');
         } else {
           alert("Order Saved Successfully!");
@@ -298,7 +287,7 @@ function OrderSetupModule() {
     }
   };
 
-  // 🖨️ server.js -இல் உள்ள அதே டிசைனில் பிரின்ட் செய்யக்கூடிய ஃபங்க்ஷன்
+  // 🖨️ DUAL WINDOW PRINT FUNCTION (CUSTOMER BILL + KITCHEN KOT)
   const handleBrowserPrint = (tokenNo = '001') => {
     const today = new Date();
     const currentDate = today.toISOString().split('T')[0];
@@ -314,32 +303,34 @@ function OrderSetupModule() {
 
     const totalQty = cartItems.reduce((sum, item) => sum + Number(item.qty), 0);
 
-    const printWindow = window.open('', '', 'width=400,height=700');
-    
-    const printHtml = `
+    const commonStyle = `
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;700&display=swap');
+        body { width: 280px; margin: 0; padding: 5px; font-family: 'Hind Madurai', monospace, sans-serif; font-size: 13px; color: #000; }
+        .center { text-align: center; }
+        .bold { font-weight: bold; }
+        .title { font-size: 18px; margin-bottom: 2px; text-transform: uppercase; }
+        .subtitle { font-size: 12px; margin-bottom: 10px; }
+        .line { border-top: 1px dashed #000; margin: 5px 0; }
+        .info-table, .items-table { width: 100%; border-collapse: collapse; }
+        .info-table td { padding: 2px 0; font-size: 12px; }
+        .items-table th { border-bottom: 1px dashed #000; text-align: left; padding: 4px 0; font-size: 12px; }
+        .items-table td { padding: 4px 0; vertical-align: top; }
+        .right { text-align: right; }
+        .total-section { font-size: 14px; margin-top: 5px; }
+      </style>
+    `;
+
+    // 1. FIRST WINDOW: CUSTOMER BILL
+    const billWindow = window.open('', '_blank', 'width=400,height=600');
+    const billHtml = `
       <html>
         <head>
           <meta charset="utf-8">
-          <title>Order Receipt & KOT</title>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;700&display=swap');
-            body { width: 280px; margin: 0; padding: 5px; font-family: 'Hind Madurai', monospace, sans-serif; font-size: 13px; color: #000; }
-            .center { text-align: center; }
-            .bold { font-weight: bold; }
-            .title { font-size: 18px; margin-bottom: 2px; text-transform: uppercase; }
-            .subtitle { font-size: 12px; margin-bottom: 10px; }
-            .line { border-top: 1px dashed #000; margin: 5px 0; }
-            .info-table, .items-table { width: 100%; border-collapse: collapse; }
-            .info-table td { padding: 2px 0; font-size: 12px; }
-            .items-table th { border-bottom: 1px dashed #000; text-align: left; padding: 4px 0; font-size: 12px; }
-            .items-table td { padding: 4px 0; vertical-align: top; }
-            .right { text-align: right; }
-            .total-section { font-size: 14px; margin-top: 5px; }
-            .page-break { page-break-after: always; margin-bottom: 20px; }
-          </style>
+          <title>Customer Bill</title>
+          ${commonStyle}
         </head>
         <body>
-          <!-- 1. CUSTOMER BILL (SERVER.JS DESIGN) -->
           <div class="center">
             <span class="bold title">${companyName}</span><br/>
             <span class="subtitle">${address1} ${address2}</span>
@@ -401,54 +392,74 @@ function OrderSetupModule() {
           <div class="center bold" style="margin-top: 8px; font-size: 11px;">
             ~ Thank You! Visit Again ~
           </div>
-
-          <div class="page-break"></div>
-
-          <!-- 2. KITCHEN KOT PRINT (SERVER.JS DESIGN) -->
-          <div class="center">
-            <span class="bold title">** KOT / KITCHEN **</span><br/>
-            <span style="font-size:16px; font-weight:bold; background:#000; color:#fff; padding:2px 5px;">Token No: ${tokenNo}</span> 
-          </div>
-          <div class="line"></div>
-          <table class="info-table">
-            <tr><td><b>Order No:</b> ${orderPfx}${orderNo}</td><td class="right"><b>Table:</b> ${tableObj ? 'Table ' + tableObj.table_no : 'N/A'}</td></tr>
-            <tr><td><b>Date:</b> ${currentDate}</td><td class="right"><b>Time:</b> ${currentTime}</td></tr>
-            <tr><td colspan="2"><b>Waiter:</b> ${waiterObj ? waiterObj.waiter_name : 'N/A'}</td></tr>
-          </table>
-          <div class="line"></div>
-          <table class="items-table">
-            <thead>
-              <tr>
-                <th style="width: 25%;">Qty</th>
-                <th style="width: 75%;">Item Name</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${cartItems.map(item => `
-                <tr>
-                  <td class="bold" style="font-size: 16px;">${item.qty}</td>
-                  <td>${item.product_name}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-          <div class="line"></div>
-          <table class="info-table">
-            <tr class="bold"><td>TOTAL QTY: ${totalQty}</td></tr>
-          </table>
-          <div class="line"></div>
         </body>
       </html>
     `;
 
-    printWindow.document.write(printHtml);
-    printWindow.document.close();
-    printWindow.focus();
-    
+    billWindow.document.write(billHtml);
+    billWindow.document.close();
+    billWindow.focus();
+
     setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 250);
+      billWindow.print();
+      billWindow.close();
+
+      // 2. SECOND WINDOW: KITCHEN KOT
+      const kotWindow = window.open('', '_blank', 'width=400,height=600');
+      const kotHtml = `
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Kitchen KOT</title>
+            ${commonStyle}
+          </head>
+          <body>
+            <div class="center">
+              <span class="bold title">** KOT / KITCHEN **</span><br/>
+              <span style="font-size:16px; font-weight:bold; background:#000; color:#fff; padding:2px 5px;">Token No: ${tokenNo}</span> 
+            </div>
+            <div class="line"></div>
+            <table class="info-table">
+              <tr><td><b>Order No:</b> ${orderPfx}${orderNo}</td><td class="right"><b>Table:</b> ${tableObj ? 'Table ' + tableObj.table_no : 'N/A'}</td></tr>
+              <tr><td><b>Date:</b> ${currentDate}</td><td class="right"><b>Time:</b> ${currentTime}</td></tr>
+              <tr><td colspan="2"><b>Waiter:</b> ${waiterObj ? waiterObj.waiter_name : 'N/A'}</td></tr>
+            </table>
+            <div class="line"></div>
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th style="width: 25%;">Qty</th>
+                  <th style="width: 75%;">Item Name</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${cartItems.map(item => `
+                  <tr>
+                    <td class="bold" style="font-size: 16px;">${item.qty}</td>
+                    <td>${item.product_name}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            <div class="line"></div>
+            <table class="info-table">
+              <tr class="bold"><td>TOTAL QTY: ${totalQty}</td></tr>
+            </table>
+            <div class="line"></div>
+          </body>
+        </html>
+      `;
+
+      kotWindow.document.write(kotHtml);
+      kotWindow.document.close();
+      kotWindow.focus();
+
+      setTimeout(() => {
+        kotWindow.print();
+        kotWindow.close();
+      }, 300);
+
+    }, 500);
   };
 
   const resetPOS = () => {
@@ -498,7 +509,6 @@ function OrderSetupModule() {
         <h2>🛒 POS Order Setup</h2>
         <div className={styles.tabButtons}>
           <button onClick={() => { setActiveTab('entry'); resetPOS(); }} className={activeTab === 'entry' ? styles.activeTab : ''}>POS Screen</button>
-          {/* <button onClick={() => setActiveTab('list')} className={activeTab === 'list' ? styles.activeTab : ''}>Orders List</button> */}
           <button 
             onClick={() => { 
               setActiveTab('list'); 
@@ -558,19 +568,15 @@ function OrderSetupModule() {
               </div>
             </div>
 
-            {/* 🎯 ப்ராடக்ட் கிரிட் பகுதி (AC / NON_AC ரேட் சிக்கல் சரிசெய்யப்பட்டது) */}
+            {/* Product Grid */}
             <div className={styles.productGrid}>
               {filteredProducts.map((p) => {
-                // 💡 கார்ட்டில் இந்த ப்ராடக்ட் ஏற்கனவே இருக்கிறதா என்று பார்க்கிறோம்
                 const cartItem = cartItems.find(item => item.product_id === p.id);
                 const productCount = cartItem ? cartItem.qty : 0;
-
-                // 🔥 மாஸ் லாஜிக்: ஆர்டர் டைப் 'AC' ஆக இருந்தால் ac_rate, இல்லையென்றால் non_ac_rate ஐ எடுக்கிறோம்!
                 const displayPrice = orderType === 'AC' ? (p.ac_rate || 0) : (p.non_ac_rate || 0);
 
-                // 💡 மைனஸ் பொத்தானை அழுத்தும்போது கார்ட்டில் இருந்து அளவைக் குறைக்க
                 const handleMinusClick = (e) => {
-                  e.stopPropagation(); // கார்டு கிளிக் ஆகி மீண்டும் பிளஸ் ஆகாமல் தடுக்க
+                  e.stopPropagation();
                   
                   if (productCount <= 1) {
                     setCartItems(prev => prev.filter(item => item.product_id !== p.id));
@@ -590,7 +596,6 @@ function OrderSetupModule() {
                     onClick={() => addToCart(p)}
                     style={{ position: 'relative', cursor: 'pointer', minHeight: '120px' }}
                   >
-                    {/* 🔢 கவுண்ட் & மைனஸ் பார் */}
                     {productCount > 0 && (
                       <div style={{
                         position: 'absolute',
@@ -645,8 +650,6 @@ function OrderSetupModule() {
                     <div className={styles.productInfo} style={{ padding: '8px' }}>
                       <div className={styles.pNameName}>{p.product_name}</div>
                       <div className={styles.pTamilName}>{p.tamil_name || ''}</div>
-                      
-                      {/* 🎯 ரேட் காட்டும் பகுதி: இப்போ உங்க டேட்டாபேஸில் உள்ள துல்லியமான விலை காட்டும்! */}
                       <div style={{ 
                         fontWeight: 'bold', 
                         color: '#1d4ed8', 
@@ -770,7 +773,6 @@ function OrderSetupModule() {
             <tbody>
               {ordersList.map(o => (
                 <tr key={o.id}>
-                  {/* data-label ப்ராப்பர்ட்டிகள் சேர்க்கப்பட்டுள்ளன 👇 */}
                   <td data-label="Order No"><strong>{o.order_pfx}{o.order_no}</strong></td>
                   <td data-label="Token No"><mark><b>{o.token_no}</b></mark></td>
                   <td data-label="Date / Time">{o.order_date} | {o.order_time}</td>
