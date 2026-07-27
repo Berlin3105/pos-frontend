@@ -36,7 +36,7 @@ function OrderSetupModule() {
     return new Date().toISOString().split('T')[0];
   };
 
-  // தேதி ஸ்டேட்கள் (Default ஆக தற்போதைய தேதி இருக்கும்)
+  // தேதி ஸ்டேட்கள்
   const [fromDate, setFromDate] = useState(getTodayDateString());
   const [toDate, setToDate] = useState(getTodayDateString());
 
@@ -56,9 +56,7 @@ function OrderSetupModule() {
     }
   };
 
-  // ==========================================
   // ⚡ அட்மின் & லிங்க்டு வெயிட்டர் லாஜிக்
-  // ==========================================
   const displayedWaiters = waiters.filter(w => {
     if (!currentUser) return false;
 
@@ -239,6 +237,7 @@ function OrderSetupModule() {
   const gstValue = (grossValue * gstPercent) / 100;
   const netValue = grossValue + gstValue;
 
+  // 💾 SAVE & DYNAMIC TOKEN HANDLING
   const saveOrder = async (isPrint = true) => {
     if (!selectedWaiter || !selectedTable || cartItems.length === 0) {
       alert("Please select Waiter, Table and at least one Product!");
@@ -274,8 +273,13 @@ function OrderSetupModule() {
 
       if (res.ok) {
         const resData = await res.json();
+        
+        // 🎯 Dynamic Token Number Fix:
+        // Response-இல் எங்கு token_no இருந்தாலும் அதை எடுக்கிறது
+        const currentTokenNo = resData.token_no || resData.tokenNo || resData.order?.token_no || orderNo || '001';
+
         if (isPrint) {
-          handleBrowserPrint(resData.token_no || '001');
+          handleBrowserPrint(currentTokenNo);
         } else {
           alert("Order Saved Successfully!");
         }
@@ -287,8 +291,8 @@ function OrderSetupModule() {
     }
   };
 
-  // 🖨️ DUAL WINDOW PRINT FUNCTION (CUSTOMER BILL + KITCHEN KOT)
-  const handleBrowserPrint = (tokenNo = '001') => {
+  // 🖨️ DUAL WINDOW PRINT FUNCTION
+  const handleBrowserPrint = (tokenNo) => {
     const today = new Date();
     const currentDate = today.toISOString().split('T')[0];
     const currentTime = today.toTimeString().split(' ')[0];
@@ -327,7 +331,7 @@ function OrderSetupModule() {
       <html>
         <head>
           <meta charset="utf-8">
-          <title>Customer Bill</title>
+          <title>CUSTOMER BILL - Select Bill Printer</title>
           ${commonStyle}
         </head>
         <body>
@@ -400,6 +404,7 @@ function OrderSetupModule() {
     billWindow.document.close();
     billWindow.focus();
 
+    // Customer print முடிந்த பின்னரே Kitchen KOT ஓபன் ஆகும்
     setTimeout(() => {
       billWindow.print();
       billWindow.close();
@@ -410,7 +415,7 @@ function OrderSetupModule() {
         <html>
           <head>
             <meta charset="utf-8">
-            <title>Kitchen KOT</title>
+            <title>KITCHEN KOT - Select Kitchen Printer</title>
             ${commonStyle}
           </head>
           <body>
@@ -457,9 +462,9 @@ function OrderSetupModule() {
       setTimeout(() => {
         kotWindow.print();
         kotWindow.close();
-      }, 300);
+      }, 500);
 
-    }, 500);
+    }, 1000);
   };
 
   const resetPOS = () => {
@@ -670,7 +675,7 @@ function OrderSetupModule() {
           {/* Billing Section */}
           <div className={styles.billingSection}>
             <div className={styles.billInvoiceInfo} style={{ display: 'flex', justifyContent: 'space-between', gap: '20px' }}>
-              <span><strong>Invoice No:</strong> {orderPfx}{orderNo}</span>
+              <span><strong>Invoice No:</strong> {orderPfx}${orderNo}</span>
               {selectedWaiter && (
                 <span style={{ color: '#0284c7', fontWeight: 'bold' }}>
                   🤵 Waiter: {waiters.find(w => Number(w.id) === Number(selectedWaiter))?.waiter_name || 'Unknown'}
