@@ -475,7 +475,7 @@ function OrderSetupModule() {
     // சிறிய இடைவெளியில் Kitchen KOT பிரிண்ட் விண்டோ தனியாகத் திறக்கும்
     setTimeout(() => {
       printKitchenKOT();
-    }, 600);
+    }, 400);
   };
 
   const resetPOS = () => {
