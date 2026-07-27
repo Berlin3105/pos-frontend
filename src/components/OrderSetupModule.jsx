@@ -237,8 +237,6 @@ function OrderSetupModule() {
   const gstValue = (grossValue * gstPercent) / 100;
   const netValue = grossValue + gstValue;
 
-  // 💾 SAVE & DYNAMIC TOKEN HANDLING
-  // 💾 SAVE & DYNAMIC TOKEN HANDLING
   const saveOrder = async (isPrint = true) => {
     if (!selectedWaiter || !selectedTable || cartItems.length === 0) {
       alert("Please select Waiter, Table and at least one Product!");
@@ -259,7 +257,7 @@ function OrderSetupModule() {
       gst_value: gstValue,
       net_value: netValue,
       items: cartItems,
-      is_print: isPrint // 👈 Backend பிரிண்டருக்கும் இது பயன்படும்
+      is_print: isPrint
     };
 
     try {
@@ -275,7 +273,8 @@ function OrderSetupModule() {
       if (res.ok) {
         const resData = await res.json();
         
-        const currentTokenNo = resData.token_no || resData.tokenNo || resData.order?.token_no || orderNo || '001';
+        // 💡 பில் நம்பருக்கு பதிலாக டேட்டாபேஸில் இருந்து வரும் சரியான Token No-வை பெறுகிறோம்
+        const currentTokenNo = resData.token_no || resData.tokenNo || resData.order?.token_no || '001';
 
         if (isPrint) {
           handleBrowserPrint(currentTokenNo);
@@ -305,35 +304,31 @@ function OrderSetupModule() {
 
     const totalQty = cartItems.reduce((sum, item) => sum + Number(item.qty), 0);
 
-    const printWindow = window.open('', '_blank', 'width=400,height=600');
-    
-    const combinedHtml = `
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <title>PRINT BILL & KOT</title>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;700&display=swap');
-            body { width: 280px; margin: 0; padding: 5px; font-family: 'Hind Madurai', monospace, sans-serif; font-size: 13px; color: #000; }
-            .center { text-align: center; }
-            .bold { font-weight: bold; }
-            .title { font-size: 18px; margin-bottom: 2px; text-transform: uppercase; }
-            .subtitle { font-size: 12px; margin-bottom: 10px; }
-            .line { border-top: 1px dashed #000; margin: 5px 0; }
-            .info-table, .items-table { width: 100%; border-collapse: collapse; }
-            .info-table td { padding: 2px 0; font-size: 12px; }
-            .items-table th { border-bottom: 1px dashed #000; text-align: left; padding: 4px 0; font-size: 12px; }
-            .items-table td { padding: 4px 0; vertical-align: top; }
-            .right { text-align: right; }
-            .total-section { font-size: 14px; margin-top: 5px; }
-            
-            /* KOT பிரிண்ட்டை அடுத்த பக்கத்திற்கு தள்ளும் CSS */
-            .page-break { page-break-after: always; break-after: page; }
-          </style>
-        </head>
-        <body>
-          <!-- 1. CUSTOMER BILL -->
-          <div class="page-break">
+  // 📄 1. CUSTOMER BILL PRINT (தனி PDF Window)
+    const printCustomerBill = () => {
+      const custWindow = window.open('', '_blank', 'width=400,height=600');
+      const custHtml = `
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>CUSTOMER BILL</title>
+            <style>
+              @import url('https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;700&display=swap');
+              body { width: 280px; margin: 0; padding: 5px; font-family: 'Hind Madurai', monospace, sans-serif; font-size: 13px; color: #000; }
+              .center { text-align: center; }
+              .bold { font-weight: bold; }
+              .title { font-size: 18px; margin-bottom: 2px; text-transform: uppercase; }
+              .subtitle { font-size: 12px; margin-bottom: 10px; }
+              .line { border-top: 1px dashed #000; margin: 5px 0; }
+              .info-table, .items-table { width: 100%; border-collapse: collapse; }
+              .info-table td { padding: 2px 0; font-size: 12px; }
+              .items-table th { border-bottom: 1px dashed #000; text-align: left; padding: 4px 0; font-size: 12px; }
+              .items-table td { padding: 4px 0; vertical-align: top; }
+              .right { text-align: right; }
+              .total-section { font-size: 14px; margin-top: 5px; }
+            </style>
+          </head>
+          <body>
             <div class="center">
               <span class="bold title">${companyName}</span><br/>
               <span class="subtitle">${address1} ${address2}</span>
@@ -395,10 +390,41 @@ function OrderSetupModule() {
             <div class="center bold" style="margin-top: 8px; font-size: 11px;">
               ~ Thank You! Visit Again ~
             </div>
-          </div>
+          </body>
+        </html>
+      `;
+      custWindow.document.write(custHtml);
+      custWindow.document.close();
+      custWindow.focus();
+      setTimeout(() => {
+        custWindow.print();
+        custWindow.close();
+      }, 400);
+    };
 
-          <!-- 2. KITCHEN KOT -->
-          <div>
+    // 📄 2. KITCHEN KOT PRINT (தனி PDF Window)
+    const printKitchenKOT = () => {
+      const kotWindow = window.open('', '_blank', 'width=400,height=600');
+      const kotHtml = `
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>KITCHEN KOT</title>
+            <style>
+              @import url('https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;700&display=swap');
+              body { width: 280px; margin: 0; padding: 5px; font-family: 'Hind Madurai', monospace, sans-serif; font-size: 13px; color: #000; }
+              .center { text-align: center; }
+              .bold { font-weight: bold; }
+              .title { font-size: 18px; margin-bottom: 2px; text-transform: uppercase; }
+              .line { border-top: 1px dashed #000; margin: 5px 0; }
+              .info-table, .items-table { width: 100%; border-collapse: collapse; }
+              .info-table td { padding: 2px 0; font-size: 12px; }
+              .items-table th { border-bottom: 1px dashed #000; text-align: left; padding: 4px 0; font-size: 12px; }
+              .items-table td { padding: 4px 0; vertical-align: top; }
+              .right { text-align: right; }
+            </style>
+          </head>
+          <body>
             <div class="center">
               <span class="bold title">** KOT / KITCHEN **</span><br/>
               <span style="font-size:16px; font-weight:bold; background:#000; color:#fff; padding:2px 5px;">Token No: ${tokenNo}</span> 
@@ -431,19 +457,25 @@ function OrderSetupModule() {
               <tr class="bold"><td>TOTAL QTY: ${totalQty}</td></tr>
             </table>
             <div class="line"></div>
-          </div>
-        </body>
-      </html>
-    `;
+          </body>
+        </html>
+      `;
+      kotWindow.document.write(kotHtml);
+      kotWindow.document.close();
+      kotWindow.focus();
+      setTimeout(() => {
+        kotWindow.print();
+        kotWindow.close();
+      }, 400);
+    };
 
-    printWindow.document.write(combinedHtml);
-    printWindow.document.close();
-    printWindow.focus();
+    // முதலாவதாக Customer Bill பிரிண்ட் விண்டோ திறக்கும்
+    printCustomerBill();
 
+    // சிறிய இடைவெளியில் Kitchen KOT பிரிண்ட் விண்டோ தனியாகத் திறக்கும்
     setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 500);
+      printKitchenKOT();
+    }, 600);
   };
 
   const resetPOS = () => {
