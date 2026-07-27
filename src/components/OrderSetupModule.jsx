@@ -28,6 +28,8 @@ function OrderSetupModule() {
   const [numPadValue, setNumPadValue] = useState('');
   const [gstPercent, setGstPercent] = useState(5); 
 
+  // கம்பெனி விபரங்கள் ஸ்டேட் (server.js -இல் உள்ளவாறு தலைப்பு/முகவரி காட்ட)
+  const [company, setCompany] = useState(null);
 
   // இன்னைய தேதியை YYYY-MM-DD வடிவில் பெற
   const getTodayDateString = () => {
@@ -169,6 +171,12 @@ function OrderSetupModule() {
       const productData = await productRes.json();
       setProducts(productData);
       setFilteredProducts(productData); 
+
+      // கம்பெனி விபரங்களை பெற
+      const compRes = await fetch(`${BACKEND_URL}/api/companies/single`);
+      if (compRes.ok) {
+        setCompany(await compRes.json());
+      }
     } catch (err) {
       console.error("Error loading initial POS data:", err);
     }
@@ -275,9 +283,10 @@ function OrderSetupModule() {
       });
 
       if (res.ok) {
+        const resData = await res.json();
         if (isPrint) {
-          // Browser Print Popup-ஐ ஓபன் செய்யும் ஃபங்க்ஷன்
-          handleBrowserPrint();
+          // server.js -இல் உள்ள அதே ஸ்டைல் படி பில் மற்றும் KOT பிரின்ட் எடுக்கப்படுகிறது
+          handleBrowserPrint(resData.token_no || '001');
         } else {
           alert("Order Saved Successfully!");
         }
@@ -289,50 +298,145 @@ function OrderSetupModule() {
     }
   };
 
-  // 🖨️ Browser Printer Popup Triggers
-  const handleBrowserPrint = () => {
-    const printWindow = window.open('', '', 'width=400,height=600');
+  // 🖨️ server.js -இல் உள்ள அதே டிசைனில் பிரின்ட் செய்யக்கூடிய ஃபங்க்ஷன்
+  const handleBrowserPrint = (tokenNo = '001') => {
+    const today = new Date();
+    const currentDate = today.toISOString().split('T')[0];
+    const currentTime = today.toTimeString().split(' ')[0];
+
+    const waiterObj = waiters.find(w => Number(w.id) === Number(selectedWaiter));
+    const tableObj = tables.find(t => Number(t.id) === Number(selectedTable));
+
+    const companyName = company?.company_name || 'RESTAURANT BILL';
+    const address1 = company?.address1 || '';
+    const address2 = company?.address2 || '';
+    const gstNo = company?.gst_no || '';
+
+    const totalQty = cartItems.reduce((sum, item) => sum + Number(item.qty), 0);
+
+    const printWindow = window.open('', '', 'width=400,height=700');
     
     const printHtml = `
       <html>
         <head>
-          <title>Order Receipt</title>
+          <meta charset="utf-8">
+          <title>Order Receipt & KOT</title>
           <style>
-            body { font-family: monospace; padding: 10px; width: 280px; }
+            @import url('https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;700&display=swap');
+            body { width: 280px; margin: 0; padding: 5px; font-family: 'Hind Madurai', monospace, sans-serif; font-size: 13px; color: #000; }
             .center { text-align: center; }
+            .bold { font-weight: bold; }
+            .title { font-size: 18px; margin-bottom: 2px; text-transform: uppercase; }
+            .subtitle { font-size: 12px; margin-bottom: 10px; }
+            .line { border-top: 1px dashed #000; margin: 5px 0; }
+            .info-table, .items-table { width: 100%; border-collapse: collapse; }
+            .info-table td { padding: 2px 0; font-size: 12px; }
+            .items-table th { border-bottom: 1px dashed #000; text-align: left; padding: 4px 0; font-size: 12px; }
+            .items-table td { padding: 4px 0; vertical-align: top; }
             .right { text-align: right; }
-            .line { border-bottom: 1px dashed #000; margin: 5px 0; }
-            table { width: 100%; font-size: 12px; }
+            .total-section { font-size: 14px; margin-top: 5px; }
+            .page-break { page-break-after: always; margin-bottom: 20px; }
           </style>
         </head>
         <body>
+          <!-- 1. CUSTOMER BILL (SERVER.JS DESIGN) -->
           <div class="center">
-            <h2>RECEIPT</h2>
-            <p>Order No: ${orderPfx}${orderNo}</p>
+            <span class="bold title">${companyName}</span><br/>
+            <span class="subtitle">${address1} ${address2}</span>
+            ${gstNo ? `<br/><span class="subtitle">GSTIN: ${gstNo}</span>` : ''}
           </div>
           <div class="line"></div>
-          <table>
+          <table class="info-table">
+            <tr>
+              <td><b>Order No:</b> ${orderPfx}${orderNo}</td>
+              <td class="right"><b>Table:</b> ${tableObj ? 'Table ' + tableObj.table_no : 'N/A'}</td>
+            </tr>
+            <tr>
+              <td><b>Date:</b> ${currentDate}</td>
+              <td class="right"><b>Time:</b> ${currentTime}</td>
+            </tr>
+            <tr>
+              <td><b>Waiter:</b> ${waiterObj ? waiterObj.waiter_name : 'N/A'}</td>
+            </tr>
+            <tr>
+              <td class="right" colspan="2"><span style="font-size: 14px; font-weight: bold; border: 1px solid #000; padding: 1px 4px;">TOKEN: ${tokenNo}</span></td>
+            </tr>
+          </table>
+          <div class="line"></div>
+          <table class="items-table">
             <thead>
               <tr>
-                <th align="left">Item</th>
-                <th align="right">Qty</th>
-                <th align="right">Amt</th>
+                <th style="width: 50%;">Item</th>
+                <th class="right" style="width: 20%;">Qty</th>
+                <th class="right" style="width: 30%;">Amount</th>
               </tr>
             </thead>
             <tbody>
               ${cartItems.map(item => `
                 <tr>
                   <td>${item.product_name}</td>
-                  <td align="right">${item.qty}</td>
-                  <td align="right">₹${item.value.toFixed(2)}</td>
+                  <td class="right">${item.qty}</td>
+                  <td class="right">₹${Number(item.value).toFixed(2)}</td>
                 </tr>
               `).join('')}
             </tbody>
           </table>
           <div class="line"></div>
-          <div class="right">
-            <strong>Net Total: ₹${netValue.toFixed(2)}</strong>
+          <table class="info-table total-section">
+            <tr class="bold">
+              <td>Total Qty: ${totalQty}</td>
+              <td class="right">Gross: ₹${grossValue.toFixed(2)}</td>
+            </tr>
+            ${gstValue > 0 ? `
+            <tr>
+              <td></td>
+              <td class="right">GST (${gstPercent}%): ₹${gstValue.toFixed(2)}</td>
+            </tr>` : ''}
+            <tr class="bold" style="font-size: 15px;">
+              <td></td>
+              <td class="right">NET TOTAL: ₹${netValue.toFixed(2)}</td>
+            </tr>
+          </table>
+          <div class="line"></div>
+          <div class="center bold" style="margin-top: 8px; font-size: 11px;">
+            ~ Thank You! Visit Again ~
           </div>
+
+          <div class="page-break"></div>
+
+          <!-- 2. KITCHEN KOT PRINT (SERVER.JS DESIGN) -->
+          <div class="center">
+            <span class="bold title">** KOT / KITCHEN **</span><br/>
+            <span style="font-size:16px; font-weight:bold; background:#000; color:#fff; padding:2px 5px;">Token No: ${tokenNo}</span> 
+          </div>
+          <div class="line"></div>
+          <table class="info-table">
+            <tr><td><b>Order No:</b> ${orderPfx}${orderNo}</td><td class="right"><b>Table:</b> ${tableObj ? 'Table ' + tableObj.table_no : 'N/A'}</td></tr>
+            <tr><td><b>Date:</b> ${currentDate}</td><td class="right"><b>Time:</b> ${currentTime}</td></tr>
+            <tr><td colspan="2"><b>Waiter:</b> ${waiterObj ? waiterObj.waiter_name : 'N/A'}</td></tr>
+          </table>
+          <div class="line"></div>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th style="width: 25%;">Qty</th>
+                <th style="width: 75%;">Item Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${cartItems.map(item => `
+                <tr>
+                  <td class="bold" style="font-size: 16px;">${item.qty}</td>
+                  <td>${item.product_name}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="line"></div>
+          <table class="info-table">
+            <tr class="bold"><td>TOTAL QTY: ${totalQty}</td></tr>
+          </table>
+          <div class="line"></div>
         </body>
       </html>
     `;
@@ -341,7 +445,6 @@ function OrderSetupModule() {
     printWindow.document.close();
     printWindow.focus();
     
-    // 💡 Browser Print Dialogue-ஐ திறக்கும்
     setTimeout(() => {
       printWindow.print();
       printWindow.close();
