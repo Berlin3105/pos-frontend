@@ -1,836 +1,644 @@
 import React, { useState, useEffect } from 'react';
-import styles from './OrderSetupModule.module.css';
-import { BACKEND_URL } from '../config.js';
+import axios from 'axios';
+import { 
+  ShoppingBag, Trash2, Plus, Minus, Printer, CheckCircle, 
+  Search, RefreshCw, X, User, Phone, MapPin, Scissors, HardDrive
+} from 'lucide-react';
 
-function OrderSetupModule() {
-  const [activeTab, setActiveTab] = useState('entry');
-  const [ordersList, setOrdersList] = useState([]);
-  const [editingOrderId, setEditingOrderId] = useState(null);
+const OrderSetupModule = () => {
+  // State variables
+  const [categories, setCategories] = useState([]);
+  const [items, setItems] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
   
-  // கிரிட் லோடிங் ஸ்டேட்ஸ்
-  const [waiters, setWaiters] = useState([]);
-  const [tables, setTables] = useState([]);
-  const [groups, setGroups] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [selectedGroup, setSelectedGroup] = useState(null);
+  // Cart & Order State
+  const [cart, setCart] = useState([]);
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [deliveryDate, setDeliveryDate] = useState('');
+  const [orderNotes, setOrderNotes] = useState('');
+  const [advanceAmount, setAdvanceAmount] = useState(0);
+  const [discountAmount, setDiscountAmount] = useState(0);
 
-  // மாஸ்டர் செலக்ட் ஸ்டேட்ஸ்
-  const [selectedWaiter, setSelectedWaiter] = useState(null);
-  const [selectedTable, setSelectedTable] = useState(null);
-  const [orderType, setOrderType] = useState('NON_AC'); 
-  const [currentUser, setCurrentUser] = useState(null);
+  // Measurements Modal State
+  const [selectedItemForMeasurement, setSelectedItemForMeasurement] = useState(null);
+  const [itemMeasurements, setItemMeasurements] = useState({});
 
-  const [orderNo, setOrderNo] = useState('');
-  const [cartItems, setCartItems] = useState([]);
-  const [isNumPadOpen, setIsNumPadOpen] = useState(false);
-  const [activeCartIndex, setActiveCartIndex] = useState(null);
-  const [numPadValue, setNumPadValue] = useState('');
-  const [gstPercent, setGstPercent] = useState(5); 
+  // Loading & Action States
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
-  // கம்பெனி விபரங்கள் ஸ்டேட்
-  const [company, setCompany] = useState(null);
-
-  // இன்னைய தேதியை YYYY-MM-DD வடிவில் பெற
-  const getTodayDateString = () => {
-    return new Date().toISOString().split('T')[0];
-  };
-
-  // தேதி ஸ்டேட்கள்
-  const [fromDate, setFromDate] = useState(getTodayDateString());
-  const [toDate, setToDate] = useState(getTodayDateString());
-
-  // குறிப்பிட்ட தேதிகளுக்குள் உள்ள ஆர்டர்களை மட்டும் எடுக்கும் ஃபங்க்ஷன்
-  const fetchFilteredOrders = async (fDate, tDate) => {
-    try {
-      const targetFrom = fDate || fromDate;
-      const targetTo = tDate || toDate;
-      
-      const res = await fetch(`${BACKEND_URL}/api/orders?from_date=${targetFrom}&to_date=${targetTo}`);
-      if (res.ok) {
-        const data = await res.json();
-        setOrdersList(data);
-      }
-    } catch (err) {
-      console.error("Error loading filtered orders:", err);
-    }
-  };
-
-  // ⚡ அட்மின் & லிங்க்டு வெயிட்டர் லாஜிக்
-  const displayedWaiters = waiters.filter(w => {
-    if (!currentUser) return false;
-
-    const loggedInUser = (currentUser.username || '').toString().trim().toLowerCase();
-    const userRole = (currentUser.role || '').toString().trim().toLowerCase();
-
-    if (currentUser.linked_waiters && currentUser.linked_waiters !== 'null' && currentUser.linked_waiters !== '') {
-      let linkedIds = [];
-      if (Array.isArray(currentUser.linked_waiters)) {
-        linkedIds = currentUser.linked_waiters.map(Number);
-      } else {
-        const cleanStr = String(currentUser.linked_waiters).replace(/[\[\]]/g, '');
-        linkedIds = cleanStr ? cleanStr.split(',').map(Number) : [];
-      }
-
-      if (linkedIds.length > 0) {
-        const dbId = Number(w.id);
-        const rawCustomId = w.waiter_id ? String(w.waiter_id).replace(/[^0-9]/g, '') : '';
-        const dbCustomId = rawCustomId ? Number(rawCustomId) : null;
-
-        return linkedIds.includes(dbId) || (dbCustomId !== null && linkedIds.includes(dbCustomId));
-      }
-    }
-
-    if (userRole === 'admin' || loggedInUser === 'admin') {
-      return true; 
-    }
-
-    if (loggedInUser && w.waiter_name) {
-      return w.waiter_name.toLowerCase() === loggedInUser;
-    }
-
-    return false;
-  });
-
+  // Fetch initial data
   useEffect(() => {
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
-    }
     fetchInitialData();
   }, []);
 
-  useEffect(() => {
-    if (displayedWaiters.length > 0 && !selectedWaiter) {
-      setSelectedWaiter(Number(displayedWaiters[0].id));
-    }
-  }, [waiters, currentUser, displayedWaiters, selectedWaiter]);
-
-  // நிதியாண்டைக் கணக்கிடும் ஃபங்க்ஷன்
-  const getFinancialYearPrefix = () => {
-    const today = new Date();
-    const currentMonth = today.getMonth(); 
-    const currentYear = today.getFullYear();
-    let startYear, endYear;
-
-    if (currentMonth >= 3) {
-      startYear = currentYear;
-      endYear = currentYear + 1;
-    } else {
-      startYear = currentYear - 1;
-      endYear = currentYear;
-    }
-    return `ORD ${startYear.toString().slice(-2)}-${endYear.toString().slice(-2)}/`;
-  };
-
-  const [orderPfx] = useState(getFinancialYearPrefix());
-
-  useEffect(() => {
-    const updatedCart = cartItems.map(item => {
-      const origProd = products.find(p => p.id === item.product_id);
-      if (origProd) {
-        const newRate = orderType === 'AC' ? origProd.ac_rate : origProd.non_ac_rate;
-        return { ...item, rate: newRate, value: item.qty * newRate };
-      }
-      return item;
-    });
-    setCartItems(updatedCart);
-  }, [orderType]);
-
   const fetchInitialData = async () => {
+    setLoading(true);
     try {
-      const noRes = await fetch(`${BACKEND_URL}/api/orders/next-no`);
-      const noData = await noRes.json();
-      setOrderNo(noData.nextNo);
-
-      const wRes = await fetch(`${BACKEND_URL}/api/waiters`);
-      setWaiters(await wRes.json());
-
-      const tRes = await fetch(`${BACKEND_URL}/api/tables`);
-      setTables(await tRes.json());
-
-      const todayStr = getTodayDateString();
-      const oRes = await fetch(`${BACKEND_URL}/api/orders?from_date=${todayStr}&to_date=${todayStr}`);
-      setOrdersList(await oRes.json());
-
-      const groupRes = await fetch(`${BACKEND_URL}/api/product-groups`);
-      setGroups(await groupRes.json());
-
-      const productRes = await fetch(`${BACKEND_URL}/api/products`);
-      const productData = await productRes.json();
-      setProducts(productData);
-      setFilteredProducts(productData); 
-
-      const compRes = await fetch(`${BACKEND_URL}/api/companies/single`);
-      if (compRes.ok) {
-        setCompany(await compRes.json());
-      }
-    } catch (err) {
-      console.error("Error loading initial POS data:", err);
+      // API call placeholders - update URLs as per your backend structure
+      const catRes = await axios.get('/api/categories');
+      const itemRes = await axios.get('/api/items');
+      setCategories(catRes.data || []);
+      setItems(itemRes.data || []);
+    } catch (error) {
+      console.error("Error fetching initial data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleGroupSelect = (groupName) => {
-    setSelectedGroup(groupName);
-    setFilteredProducts(products.filter(p => p.product_group === groupName));
-  };
-
-  const addToCart = (product) => {
-    const currentRate = orderType === 'AC' ? Number(product.ac_rate || 0) : Number(product.non_ac_rate || 0);
-    const existingIndex = cartItems.findIndex(item => item.product_id === product.id);
-
+  // Add Item to Cart
+  const addToCart = (item) => {
+    const existingIndex = cart.findIndex(c => c.id === item.id);
     if (existingIndex > -1) {
-      const updated = [...cartItems];
-      updated[existingIndex].qty += 1;
-      updated[existingIndex].value = updated[existingIndex].qty * updated[existingIndex].rate;
-      setCartItems(updated);
+      const updatedCart = [...cart];
+      updatedCart[existingIndex].qty += 1;
+      setCart(updatedCart);
     } else {
-      setCartItems([...cartItems, {
-        product_id: product.id,
-        product_name: product.product_name,
-        qty: 1,
-        rate: currentRate,
-        value: currentRate 
+      setCart([...cart, { 
+        ...item, 
+        qty: 1, 
+        price: item.price || 0,
+        measurements: {} 
       }]);
     }
   };
 
-  const handleCartChange = (index, field, val) => {
-    const updated = [...cartItems];
-    updated[index][field] = parseFloat(val) || 0;
-    updated[index].value = updated[index].qty * updated[index].rate;
-    setCartItems(updated);
-  };
-
-  const removeFromCart = (index) => {
-    setCartItems(cartItems.filter((_, i) => i !== index));
-  };
-
-  const openNumPad = (index, currentQty) => {
-    setActiveCartIndex(index);
-    setNumPadValue(currentQty.toString());
-    setIsNumPadOpen(true);
-  };
-
-  const handleNumPadKeyPress = (key) => {
-    if (key === 'C') {
-      setNumPadValue('');
-    } else if (key === '⌫') {
-      setNumPadValue(prev => prev.slice(0, -1));
-    } else {
-      if (numPadValue.length < 3) {
-        setNumPadValue(prev => prev + key);
+  // Update Cart Quantity
+  const updateQuantity = (id, delta) => {
+    const updatedCart = cart.map(item => {
+      if (item.id === id) {
+        const newQty = item.qty + delta;
+        return newQty > 0 ? { ...item, qty: newQty } : null;
       }
+      return item;
+    }).filter(Boolean);
+    setCart(updatedCart);
+  };
+
+  // Remove Item from Cart
+  const removeFromCart = (id) => {
+    setCart(cart.filter(item => item.id !== id));
+  };
+
+  // Calculate Totals
+  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+  const grandTotal = Math.max(0, subtotal - Number(discountAmount));
+  const balanceAmount = Math.max(0, grandTotal - Number(advanceAmount));
+
+  // Save Measurements for a Cart Item
+  const handleSaveMeasurements = (itemId, measurementsData) => {
+    setCart(cart.map(item => {
+      if (item.id === itemId) {
+        return { ...item, measurements: measurementsData };
+      }
+      return item;
+    }));
+    setSelectedItemForMeasurement(null);
+  };
+
+  // Customer Receipt Print HTML Generator
+  const generateCustomerBillHtml = (orderData) => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Customer Bill</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;700&display=swap');
+          
+          @page {
+            size: 80mm auto; 
+            margin: 0px;
+          }
+
+          body { 
+            width: 270px; 
+            margin: 0 auto; 
+            padding: 5px; 
+            font-family: 'Hind Madurai', monospace, sans-serif; 
+            font-size: 13px; 
+            color: #000; 
+          }
+          .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 5px; margin-bottom: 8px; }
+          .header h2 { margin: 0; font-size: 18px; font-weight: bold; }
+          .header p { margin: 2px 0; font-size: 11px; }
+          .info { margin-bottom: 8px; font-size: 12px; }
+          .info-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+          th { border-bottom: 1px solid #000; text-align: left; padding: 3px 0; font-size: 11px; }
+          td { padding: 4px 0; font-size: 12px; }
+          .totals { border-top: 1px dashed #000; padding-top: 5px; font-size: 12px; }
+          .totals-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
+          .grand-total { font-weight: bold; font-size: 14px; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 3px 0; margin: 4px 0; }
+          .footer { text-align: center; margin-top: 10px; font-size: 11px; border-top: 1px dashed #000; padding-top: 5px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h2>TAILORING SHOP</h2>
+          <p>Order Receipt / பில்</p>
+          <p>Ph: +91 98765 43210</p>
+        </div>
+        
+        <div class="info">
+          <div class="info-row"><span>Order No:</span> <strong>#${orderData.id || 'NEW'}</strong></div>
+          <div class="info-row"><span>Date:</span> <span>${new Date().toLocaleDateString('en-IN')}</span></div>
+          <div class="info-row"><span>Name:</span> <span>${orderData.customerName}</span></div>
+          <div class="info-row"><span>Phone:</span> <span>${orderData.customerPhone}</span></div>
+          <div class="info-row"><span>Delivery:</span> <strong>${orderData.deliveryDate}</strong></div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Item / பொருள்</th>
+              <th style="text-align:center;">Qty</th>
+              <th style="text-align:right;">Amt</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${orderData.cart.map(item => `
+              <tr>
+                <td>${item.name}</td>
+                <td style="text-align:center;">${item.qty}</td>
+                <td style="text-align:right;">₹${item.price * item.qty}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div class="totals">
+          <div class="totals-row"><span>Subtotal:</span> <span>₹${orderData.subtotal}</span></div>
+          ${orderData.discountAmount > 0 ? `<div class="totals-row"><span>Discount:</span> <span>-₹${orderData.discountAmount}</span></div>` : ''}
+          <div class="totals-row grand-total"><span>Grand Total:</span> <span>₹${orderData.grandTotal}</span></div>
+          <div class="totals-row"><span>Advance Paid:</span> <span>₹${orderData.advanceAmount}</span></div>
+          <div class="totals-row" style="font-weight:bold;"><span>Balance Due:</span> <span>₹${orderData.balanceAmount}</span></div>
+        </div>
+
+        <div class="footer">
+          <p>நன்றி! மீண்டும் வருக!</p>
+          <p>Please bring this slip during delivery.</p>
+        </div>
+      </body>
+      </html>
+    `;
+  };
+
+  // Kitchen/Workplace Ticket HTML Generator (KOT/Work Order)
+  const generateKitchenKOTHtml = (orderData) => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Work Order Slip</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;700&display=swap');
+          
+          @page {
+            size: 80mm auto; 
+            margin: 0px;
+          }
+
+          body { 
+            width: 270px; 
+            margin: 0 auto; 
+            padding: 5px; 
+            font-family: 'Hind Madurai', monospace, sans-serif; 
+            font-size: 13px; 
+            color: #000; 
+          }
+          .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px; }
+          .header h2 { margin: 0; font-size: 18px; }
+          .info { margin-bottom: 8px; border-bottom: 1px dashed #000; padding-bottom: 5px; }
+          .item-box { border: 1px solid #000; padding: 6px; margin-bottom: 8px; border-radius: 4px; }
+          .item-title { font-size: 14px; font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 3px; margin-bottom: 4px; }
+          .measure-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 11px; }
+          .measure-item { background: #f0f0f0; padding: 2px 4px; border-radius: 2px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h2>WORK ORDER / தையல் குறிப்பு</h2>
+          <p>Order #${orderData.id || 'NEW'} | Delivery: <strong>${orderData.deliveryDate}</strong></p>
+        </div>
+
+        <div class="info">
+          <div><strong>Customer:</strong> ${orderData.customerName}</div>
+          <div><strong>Phone:</strong> ${orderData.customerPhone}</div>
+          ${orderData.orderNotes ? `<div><strong>Notes:</strong> ${orderData.orderNotes}</div>` : ''}
+        </div>
+
+        ${orderData.cart.map(item => `
+          <div class="item-box">
+            <div class="item-title">${item.name} x ${item.qty}</div>
+            <div class="measure-grid">
+              ${Object.entries(item.measurements || {}).map(([key, val]) => `
+                <div class="measure-item"><strong>${key}:</strong> ${val}</div>
+              `).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </body>
+      </html>
+    `;
+  };
+
+  // Handle Print Triggers[cite: 1]
+  const triggerCustomerBillPrint = (orderData) => {
+    const custHtml = generateCustomerBillHtml(orderData);
+    const printWindow = window.open('', '_blank', 'width=300,height=600');
+    printWindow.document.write(custHtml);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
+  };
+
+  const triggerKitchenKOTPrint = (orderData) => {
+    const kotHtml = generateKitchenKOTHtml(orderData);
+    const printWindow = window.open('', '_blank', 'width=300,height=600');
+    printWindow.document.write(kotHtml);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
+  };
+
+  // Submit Order
+  const handleSubmitOrder = async (shouldPrint = true) => {
+    if (cart.length === 0) {
+      alert("Cart is empty!");
+      return;
     }
-  };
-
-  const saveNumPadValue = () => {
-    const finalQty = parseInt(numPadValue) || 1;
-    const updated = [...cartItems];
-    updated[activeCartIndex].qty = finalQty;
-    updated[activeCartIndex].value = finalQty * updated[activeCartIndex].rate;
-    setCartItems(updated);
-    setIsNumPadOpen(false);
-  };
-
-  const grossValue = cartItems.reduce((sum, item) => sum + item.value, 0);
-  const gstValue = (grossValue * gstPercent) / 100;
-  const netValue = grossValue + gstValue;
-
-  const saveOrder = async (isPrint = true) => {
-    if (!selectedWaiter || !selectedTable || cartItems.length === 0) {
-      alert("Please select Waiter, Table and at least one Product!");
+    if (!customerName || !customerPhone) {
+      alert("Please enter customer details!");
       return;
     }
 
-    const today = new Date();
-    const orderData = {
-      order_pfx: orderPfx,
-      order_no: orderNo,
-      order_date: today.toISOString().split('T')[0],
-      order_time: today.toTimeString().split(' ')[0],
-      waiter_id: typeof selectedWaiter === 'object' && selectedWaiter !== null ? Number(selectedWaiter.id) : Number(selectedWaiter),
-      table_id: typeof selectedTable === 'object' && selectedTable !== null ? Number(selectedTable.id) : Number(selectedTable),
-      order_type: orderType,
-      gross_value: grossValue,
-      gst_percent: gstPercent,
-      gst_value: gstValue,
-      net_value: netValue,
-      items: cartItems,
-      is_print: isPrint
+    setSubmitting(true);
+    const payload = {
+      customerName,
+      customerPhone,
+      deliveryDate,
+      orderNotes,
+      cart,
+      subtotal,
+      discountAmount,
+      grandTotal,
+      advanceAmount,
+      balanceAmount,
+      createdAt: new Date().toISOString()
     };
 
     try {
-      const url = editingOrderId ? `${BACKEND_URL}/api/orders/${editingOrderId}` : `${BACKEND_URL}/api/orders`;
-      const method = editingOrderId ? 'PUT' : 'POST';
+      const res = await axios.post('/api/orders', payload);
+      const createdOrder = res.data || { id: Math.floor(Math.random() * 10000), ...payload };
 
-      const res = await fetch(url, {
-        method: method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData)
-      });
-
-      if (res.ok) {
-        const resData = await res.json();
-        
-        // 💡 backend-ல் இருந்து வரும் சரியான Token No-வை எடுக்கிறோம்
-        const currentTokenNo = resData.token_no || resData.tokenNo || '001';
-
-        if (isPrint) {
-          handleBrowserPrint(currentTokenNo); // 👈 Correct token number passed here
-        } else {
-          alert("Order Saved Successfully!");
-        }
-        resetPOS();
-        setActiveTab('list');
+      if (shouldPrint) {
+        triggerCustomerBillPrint(createdOrder);
+        triggerKitchenKOTPrint(createdOrder);
       }
-    } catch (err) {
-      console.error("Error saving order:", err);
+
+      setSuccessMessage("Order created successfully!");
+      
+      // Reset Form
+      setCart([]);
+      setCustomerName('');
+      setCustomerPhone('');
+      setDeliveryDate('');
+      setOrderNotes('');
+      setAdvanceAmount(0);
+      setDiscountAmount(0);
+
+      setTimeout(() => setSuccessMessage(''), 4000);
+    } catch (error) {
+      console.error("Error submitting order:", error);
+      alert("Failed to submit order. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleBrowserPrint = (tokenNo) => {
-    const today = new Date();
-    const currentDate = today.toISOString().split('T')[0];
-    const currentTime = today.toTimeString().split(' ')[0];
-
-    const waiterObj = waiters.find(w => Number(w.id) === Number(selectedWaiter));
-    const tableObj = tables.find(t => Number(t.id) === Number(selectedTable));
-
-    const companyName = company?.company_name || 'RESTAURANT BILL';
-    const address1 = company?.address1 || '';
-    const address2 = company?.address2 || '';
-    const gstNo = company?.gst_no || '';
-
-    const totalQty = cartItems.reduce((sum, item) => sum + Number(item.qty), 0);
-
-    // 📄 HTML Templates
-    const custHtml = `
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <title>CUSTOMER BILL</title>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;700&display=swap');
-            body { width: 280px; margin: 0; padding: 5px; font-family: 'Hind Madurai', monospace, sans-serif; font-size: 13px; color: #000; }
-            .center { text-align: center; }
-            .bold { font-weight: bold; }
-            .title { font-size: 18px; margin-bottom: 2px; text-transform: uppercase; }
-            .subtitle { font-size: 12px; margin-bottom: 10px; }
-            .line { border-top: 1px dashed #000; margin: 5px 0; }
-            .info-table, .items-table { width: 100%; border-collapse: collapse; }
-            .info-table td { padding: 2px 0; font-size: 12px; }
-            .items-table th { border-bottom: 1px dashed #000; text-align: left; padding: 4px 0; font-size: 12px; }
-            .items-table td { padding: 4px 0; vertical-align: top; }
-            .right { text-align: right; }
-            .total-section { font-size: 14px; margin-top: 5px; }
-          </style>
-        </head>
-        <body>
-          <div class="center">
-            <span class="bold title">${companyName}</span><br/>
-            <span class="subtitle">${address1} ${address2}</span>
-            ${gstNo ? `<br/><span class="subtitle">GSTIN: ${gstNo}</span>` : ''}
-          </div>
-          <div class="line"></div>
-          <table class="info-table">
-            <tr>
-              <td><b>Order No:</b> ${orderPfx}${orderNo}</td>
-              <td class="right"><b>Table:</b> ${tableObj ? 'Table ' + tableObj.table_no : 'N/A'}</td>
-            </tr>
-            <tr>
-              <td><b>Date:</b> ${currentDate}</td>
-              <td class="right"><b>Time:</b> ${currentTime}</td>
-            </tr>
-            <tr>
-              <td><b>Waiter:</b> ${waiterObj ? waiterObj.waiter_name : 'N/A'}</td>
-            </tr>
-            <tr>
-              <td class="right" colspan="2"><span style="font-size: 14px; font-weight: bold; border: 1px solid #000; padding: 1px 4px;">TOKEN: ${tokenNo}</span></td>
-            </tr>
-          </table>
-          <div class="line"></div>
-          <table class="items-table">
-            <thead>
-              <tr>
-                <th style="width: 50%;">Item</th>
-                <th class="right" style="width: 20%;">Qty</th>
-                <th class="right" style="width: 30%;">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${cartItems.map(item => `
-                <tr>
-                  <td>${item.product_name}</td>
-                  <td class="right">${item.qty}</td>
-                  <td class="right">₹${Number(item.value).toFixed(2)}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-          <div class="line"></div>
-          <table class="info-table total-section">
-            <tr class="bold">
-              <td>Total Qty: ${totalQty}</td>
-              <td class="right">Gross: ₹${grossValue.toFixed(2)}</td>
-            </tr>
-            ${gstValue > 0 ? `
-            <tr>
-              <td></td>
-              <td class="right">GST (${gstPercent}%): ₹${gstValue.toFixed(2)}</td>
-            </tr>` : ''}
-            <tr class="bold" style="font-size: 15px;">
-              <td></td>
-              <td class="right">NET TOTAL: ₹${netValue.toFixed(2)}</td>
-            </tr>
-          </table>
-          <div class="line"></div>
-          <div class="center bold" style="margin-top: 8px; font-size: 11px;">
-            ~ Thank You! Visit Again ~
-          </div>
-        </body>
-      </html>
-    `;
-
-    const kotHtml = `
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <title>KITCHEN KOT</title>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Hind+Madurai:wght@400;700&display=swap');
-            body { width: 280px; margin: 0; padding: 5px; font-family: 'Hind Madurai', monospace, sans-serif; font-size: 13px; color: #000; }
-            .center { text-align: center; }
-            .bold { font-weight: bold; }
-            .title { font-size: 18px; margin-bottom: 2px; text-transform: uppercase; }
-            .line { border-top: 1px dashed #000; margin: 5px 0; }
-            .info-table, .items-table { width: 100%; border-collapse: collapse; }
-            .info-table td { padding: 2px 0; font-size: 12px; }
-            .items-table th { border-bottom: 1px dashed #000; text-align: left; padding: 4px 0; font-size: 12px; }
-            .items-table td { padding: 4px 0; vertical-align: top; }
-            .right { text-align: right; }
-          </style>
-        </head>
-        <body>
-          <div class="center">
-            <span class="bold title">** KOT / KITCHEN **</span><br/>
-            <span style="font-size:16px; font-weight:bold; background:#000; color:#fff; padding:2px 5px;">Token No: ${tokenNo}</span> 
-          </div>
-          <div class="line"></div>
-          <table class="info-table">
-            <tr><td><b>Order No:</b> ${orderPfx}${orderNo}</td><td class="right"><b>Table:</b> ${tableObj ? 'Table ' + tableObj.table_no : 'N/A'}</td></tr>
-            <tr><td><b>Date:</b> ${currentDate}</td><td class="right"><b>Time:</b> ${currentTime}</td></tr>
-            <tr><td colspan="2"><b>Waiter:</b> ${waiterObj ? waiterObj.waiter_name : 'N/A'}</td></tr>
-          </table>
-          <div class="line"></div>
-          <table class="items-table">
-            <thead>
-              <tr>
-                <th style="width: 25%;">Qty</th>
-                <th style="width: 75%;">Item Name</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${cartItems.map(item => `
-                <tr>
-                  <td class="bold" style="font-size: 16px;">${item.qty}</td>
-                  <td>${item.product_name}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-          <div class="line"></div>
-          <table class="info-table">
-            <tr class="bold"><td>TOTAL QTY: ${totalQty}</td></tr>
-          </table>
-          <div class="line"></div>
-        </body>
-      </html>
-    `;
-
-    // 🚀 1. Customer Bill விண்டோ திறத்தல்
-    const custWindow = window.open('', '_blank', 'width=400,height=600');
-      if (custWindow) {
-        custWindow.document.write(custHtml);
-        custWindow.document.close();
-        custWindow.focus();
-        setTimeout(() => {
-          custWindow.print();
-          custWindow.close();
-        }, 500);
-      }
-
-    // 🚀 2. Kitchen KOT விண்டோ திறத்தல் (1 விநாடி தாமதத்துடன்)
-    setTimeout(() => {
-      const kotWindow = window.open('', '_blank', 'width=400,height=600');
-      if (kotWindow) {
-        kotWindow.document.write(kotHtml);
-        kotWindow.document.close();
-        kotWindow.focus();
-        setTimeout(() => {
-          kotWindow.print();
-          kotWindow.close();
-        }, 500);
-      }
-    }, 1000);
-  };
-
-  const resetPOS = () => {
-    setEditingOrderId(null);
-    setSelectedTable(null);
-    setCartItems([]);
-    fetchInitialData(); 
-  };
-
-  const deleteOrder = async (id) => {
-    if (window.confirm("Delete this order?")) {
-      await fetch(`${BACKEND_URL}/api/orders/${id}`, { method: 'DELETE' });
-      fetchInitialData();
-    }
-  };
-
-  const startEditOrder = async (id) => {
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/orders/${id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setEditingOrderId(data.order.id);
-        setOrderNo(data.order.order_no);
-        setSelectedWaiter(data.order.waiter_id ? Number(data.order.waiter_id) : null);
-        setSelectedTable(data.order.table_id ? Number(data.order.table_id) : null);
-        setOrderType(data.order.order_type);
-        setGstPercent(Number(data.order.gst_percent));
-
-        const loadedCart = data.items.map(item => ({
-          product_id: item.product_id,
-          product_name: item.product_name,
-          qty: Number(item.qty),
-          rate: Number(item.rate),
-          value: Number(item.value)
-        }));
-        setCartItems(loadedCart);
-        setActiveTab('entry');
-      }
-    } catch (err) {
-      console.error("Error fetching order for edit:", err);
-    }
-  };
+  // Filter Items
+  const filteredItems = items.filter(item => {
+    const matchesCategory = selectedCategory === 'ALL' || item.category === selectedCategory;
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
-    <div className={styles.posContainer}>
-      <div className={styles.posHeader}>
-        <h2>🛒 POS Order Setup</h2>
-        <div className={styles.tabButtons}>
-          <button onClick={() => { setActiveTab('entry'); resetPOS(); }} className={activeTab === 'entry' ? styles.activeTab : ''}>POS Screen</button>
+    <div className="flex flex-col lg:flex-row gap-6 p-6 max-w-7xl mx-auto bg-gray-50 min-h-screen">
+      
+      {/* LEFT SECTION: Items & Catalog */}
+      <div className="flex-1 flex flex-col gap-4">
+        
+        {/* Top Search & Refresh */}
+        <div className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input 
+              type="text"
+              placeholder="Search items / உடைகள் தேடுக..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
           <button 
-            onClick={() => { 
-              setActiveTab('list'); 
-              fetchFilteredOrders(); 
-            }} 
-            className={activeTab === 'list' ? styles.activeTab : ''}
+            onClick={fetchInitialData}
+            className="p-2 border border-gray-300 rounded-lg hover:bg-gray-100 text-gray-600 transition"
+            title="Refresh Catalog"
           >
-            Orders List
+            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
           </button>
+        </div>
+
+        {/* Categories Bar */}
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+          <button
+            onClick={() => setSelectedCategory('ALL')}
+            className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition ${
+              selectedCategory === 'ALL'
+                ? 'bg-indigo-600 text-white shadow'
+                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+            }`}
+          >
+            All Items
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat.id || cat.name}
+              onClick={() => setSelectedCategory(cat.name)}
+              className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition ${
+                selectedCategory === cat.name
+                  ? 'bg-indigo-600 text-white shadow'
+                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Items Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-y-auto max-h-[calc(100vh-220px)] p-1">
+          {filteredItems.map((item) => (
+            <div 
+              key={item.id}
+              onClick={() => addToCart(item)}
+              className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:border-indigo-500 cursor-pointer transition flex flex-col justify-between group"
+            >
+              <div>
+                <div className="w-full h-24 bg-gray-100 rounded-lg mb-3 flex items-center justify-center text-gray-400 group-hover:bg-indigo-50 transition">
+                  <Scissors className="w-8 h-8 text-indigo-500" />
+                </div>
+                <h3 className="font-semibold text-gray-800 text-sm line-clamp-1">{item.name}</h3>
+                <p className="text-xs text-gray-500">{item.category}</p>
+              </div>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="font-bold text-indigo-600 text-base">₹{item.price}</span>
+                <span className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition">
+                  <Plus className="w-4 h-4" />
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {activeTab === 'entry' ? (
-        <div className={styles.posBody}>
-          <div className={styles.gridSection}>
-            
-            {/* Waiter Grid */}
-            <div className={styles.gridBlock}>
-              <h4>🤵 Select Waiter</h4>
-              <div className={styles.touchGrid}>
-                {displayedWaiters.map(w => (
-                  <button 
-                    key={w.id} 
-                    type="button" 
-                    onClick={() => setSelectedWaiter(w.id)} 
-                    className={`${styles.gridBtn} ${selectedWaiter && String(selectedWaiter) === String(w.id) ? styles.selectedBtn : ''}`}
-                  >
-                    {w.waiter_name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Table Grid */}
-            <div className={styles.gridBlock}>
-              <h4>🍽️ Select Table</h4>
-              <div className={styles.touchGrid}>
-                {tables.map(t => (
-                  <button key={t.id} type="button" onClick={() => setSelectedTable(t.id)} className={`${styles.gridBtn} ${selectedTable === t.id ? styles.selectedBtn : ''}`}>T - {t.table_no}</button>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.typeBlock}>
-              <button type="button" onClick={() => setOrderType('NON_AC')} className={`${styles.typeBtn} ${orderType === 'NON_AC' ? styles.activeNonAc : ''}`}>Non-AC</button>
-              <button type="button" onClick={() => setOrderType('AC')} className={`${styles.typeBtn} ${orderType === 'AC' ? styles.activeAc : ''}`}>AC Room</button>
-            </div>
-
-            {/* Product Group Grid */}
-            <div className={styles.gridBlock}>
-              <h4>📁 Product Groups</h4>
-              <div className={styles.groupGrid}>
-                <button type="button" onClick={() => { setSelectedGroup(null); setFilteredProducts(products); }} className={`${styles.groupBtn} ${!selectedGroup ? styles.selectedGroupBtn : ''}`}>All Items</button>
-                {groups && Array.isArray(groups) && groups.map((g, idx) => (
-                  <button key={idx} type="button" onClick={() => handleGroupSelect(g.name)} className={`${styles.groupBtn} ${selectedGroup === g.name ? styles.selectedGroupBtn : ''}`}>{g.name}</button>
-                ))}
-              </div>
-            </div>
-
-            {/* Product Grid */}
-            <div className={styles.productGrid}>
-              {filteredProducts.map((p) => {
-                const cartItem = cartItems.find(item => item.product_id === p.id);
-                const productCount = cartItem ? cartItem.qty : 0;
-                const displayPrice = orderType === 'AC' ? (p.ac_rate || 0) : (p.non_ac_rate || 0);
-
-                const handleMinusClick = (e) => {
-                  e.stopPropagation();
-                  
-                  if (productCount <= 1) {
-                    setCartItems(prev => prev.filter(item => item.product_id !== p.id));
-                  } else {
-                    setCartItems(prev => prev.map(item => 
-                      item.product_id === p.id 
-                        ? { ...item, qty: item.qty - 1, value: (item.qty - 1) * displayPrice }
-                        : item
-                    ));
-                  }
-                };
-
-                return (
-                  <div
-                    key={p.id}
-                    className={styles.productCard}
-                    onClick={() => addToCart(p)}
-                    style={{ position: 'relative', cursor: 'pointer', minHeight: '120px' }}
-                  >
-                    {productCount > 0 && (
-                      <div style={{
-                        position: 'absolute',
-                        top: '5px',
-                        right: '5px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        background: '#1e293b',
-                        padding: '4px 8px',
-                        borderRadius: '20px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                        zIndex: 10
-                      }}>
-                        <button
-                          type="button"
-                          onClick={handleMinusClick}
-                          style={{
-                            background: '#ef4444',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '50%',
-                            width: '18px',
-                            height: '18px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '14px',
-                            fontWeight: 'bold',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          -
-                        </button>
-                        <span style={{ color: 'white', fontWeight: 'bold', fontSize: '12px' }}>
-                          {productCount}
-                        </span>
-                        <span style={{ color: '#4ade80', fontWeight: 'bold', fontSize: '13px' }}>+</span>
-                      </div>
-                    )}
-
-                    {p.product_image ? (
-                      <img
-                        src={`${BACKEND_URL}/uploads/${p.product_image}`}
-                        alt={p.product_name}
-                        className={styles.productImg}
-                      />
-                    ) : (
-                      <div className={styles.noImgPlaceholder}>🍲</div>
-                    )}
-                    
-                    <div className={styles.productInfo} style={{ padding: '8px' }}>
-                      <div className={styles.pNameName}>{p.product_name}</div>
-                      <div className={styles.pTamilName}>{p.tamil_name || ''}</div>
-                      <div style={{ 
-                        fontWeight: 'bold', 
-                        color: '#1d4ed8', 
-                        fontSize: '0.8rem', 
-                        marginTop: '6px',
-                        display: 'block'
-                      }}>
-                        ₹{displayPrice}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
+      {/* RIGHT SECTION: Cart & Customer Info */}
+      <div className="w-full lg:w-[420px] bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col h-[calc(100vh-48px)] sticky top-6">
+        
+        {/* Cart Header */}
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-gray-50 rounded-t-2xl">
+          <div className="flex items-center gap-2 font-bold text-gray-800 text-lg">
+            <ShoppingBag className="w-5 h-5 text-indigo-600" />
+            <span>New Order Cart</span>
           </div>
-
-          {/* Billing Section */}
-          <div className={styles.billingSection}>
-            <div className={styles.billInvoiceInfo} style={{ display: 'flex', justifyContent: 'space-between', gap: '20px' }}>
-              <span><strong>Invoice No:</strong> {orderPfx}${orderNo}</span>
-              {selectedWaiter && (
-                <span style={{ color: '#0284c7', fontWeight: 'bold' }}>
-                  🤵 Waiter: {waiters.find(w => Number(w.id) === Number(selectedWaiter))?.waiter_name || 'Unknown'}
-                </span>
-              )}
-            </div>
-
-            <div className={styles.cartContainer}>
-              <table className={styles.cartTable}>
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th>Qty</th>
-                    <th>Rate</th>
-                    <th>Total</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {cartItems.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.product_name}</td>
-                      <td>
-                        <button type="button" className={styles.qtyTouchBtn} onClick={() => openNumPad(index, item.qty)}>{item.qty} 📝</button>
-                      </td>
-                      <td>
-                        <input type="number" value={item.rate} onChange={(e) => handleCartChange(index, 'rate', e.target.value)} className={styles.cartInput} />
-                      </td>
-                      <td>₹{Number(item.value || 0).toFixed(2)}</td>
-                      <td><button type="button" onClick={() => removeFromCart(index)} className={styles.cartDelBtn}>X</button></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className={styles.summaryBlock}>
-              <div className={styles.summaryRow}><span>Gross Total:</span> <span>₹{grossValue.toFixed(2)}</span></div>
-              <div className={styles.summaryRow}>
-                <span>GST (%):</span> 
-                <input type="number" value={gstPercent} onChange={(e) => setGstPercent(parseFloat(e.target.value) || 0)} className={styles.gstInput} />
-              </div>
-              <div className={styles.summaryRow}><span>GST Value:</span> <span>₹{gstValue.toFixed(2)}</span></div>
-              <div className={styles.summaryRow} style={{fontWeight:900, fontSize:'1.1rem', color:'#0f172a'}}>
-                <span>Net Payable:</span> <span>₹{netValue.toFixed(2)}</span>
-              </div>
-            </div>
-
-            <div className={styles.actionBtnGroup}>
-              <button type="button" onClick={() => saveOrder(false)} className={styles.btnSaveOnly}>💾 {editingOrderId ? 'Update Only' : 'Save Only'}</button>
-              <button type="button" onClick={() => saveOrder(true)} className={styles.btnSavePrint}>⚡ {editingOrderId ? 'Update & Print' : 'Save & Print'}</button>
-            </div>
-          </div>
-
+          <span className="bg-indigo-100 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+            {cart.length} Items
+          </span>
         </div>
-      ) : (
-        /* LIST VIEW TAB */
-        <div className={styles.listContainer}>
-          <div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '15px', background: '#f1f5f9', padding: '10px', borderRadius: '6px' }}>
-            <div>
-              <label style={{ fontSize: '0.85rem', fontWeight: 'bold', marginRight: '5px', color: '#475569' }}>From Date:</label>
-              <input 
-                type="date" 
-                value={fromDate} 
-                onChange={(e) => setFromDate(e.target.value)} 
-                style={{ padding: '6px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
+
+        {/* Customer Input Details */}
+        <div className="p-4 border-b border-gray-100 space-y-3 bg-white">
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Customer Name / பெயர் *"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              className="w-full pl-9 pr-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Mobile / எண் *"
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
             </div>
-            <div>
-              <label style={{ fontSize: '0.85rem', fontWeight: 'bold', marginRight: '5px', color: '#475569' }}>To Date:</label>
-              <input 
-                type="date" 
-                value={toDate} 
-                onChange={(e) => setToDate(e.target.value)} 
-                style={{ padding: '6px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
+            <div className="relative">
+              <input
+                type="date"
+                value={deliveryDate}
+                onChange={(e) => setDeliveryDate(e.target.value)}
+                className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
             </div>
-            <button 
-              type="button" 
-              onClick={() => fetchFilteredOrders()} 
-              style={{ padding: '6px 15px', background: '#0f172a', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          </div>
+        </div>
+
+        {/* Cart Item List */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {cart.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-gray-400 py-12">
+              <ShoppingBag className="w-12 h-12 stroke-1 mb-2" />
+              <p className="text-sm">No items in cart</p>
+            </div>
+          ) : (
+            cart.map((item) => (
+              <div key={item.id} className="p-3 bg-gray-50 rounded-xl border border-gray-200 flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-gray-800 text-sm">{item.name}</span>
+                  <button 
+                    onClick={() => removeFromCart(item.id)}
+                    className="text-red-400 hover:text-red-600 transition"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between mt-1">
+                  <div className="flex items-center border border-gray-300 rounded-lg bg-white">
+                    <button 
+                      onClick={() => updateQuantity(item.id, -1)}
+                      className="p-1 hover:bg-gray-100 text-gray-600 rounded-l-lg"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="px-3 text-xs font-semibold text-gray-700">{item.qty}</span>
+                    <button 
+                      onClick={() => updateQuantity(item.id, 1)}
+                      className="p-1 hover:bg-gray-100 text-gray-600 rounded-r-lg"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => setSelectedItemForMeasurement(item)}
+                    className="text-xs bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-md font-medium border border-indigo-200 hover:bg-indigo-100 transition flex items-center gap-1"
+                  >
+                    <Scissors className="w-3 h-3" />
+                    Measurements ({Object.keys(item.measurements || {}).length})
+                  </button>
+
+                  <span className="font-bold text-gray-800 text-sm">₹{item.price * item.qty}</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Calculation & Checkout Footer */}
+        <div className="p-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl space-y-3">
+          <div className="space-y-1.5 text-sm">
+            <div className="flex justify-between text-gray-600">
+              <span>Subtotal</span>
+              <span>₹{subtotal}</span>
+            </div>
+            
+            <div className="flex justify-between items-center text-gray-600">
+              <span>Discount</span>
+              <input 
+                type="number"
+                value={discountAmount}
+                onChange={(e) => setDiscountAmount(Number(e.target.value))}
+                className="w-20 px-2 py-0.5 text-right border border-gray-300 rounded text-sm focus:outline-none"
+              />
+            </div>
+
+            <div className="flex justify-between font-bold text-gray-800 text-base border-t border-gray-200 pt-1.5">
+              <span>Grand Total</span>
+              <span>₹{grandTotal}</span>
+            </div>
+
+            <div className="flex justify-between items-center text-gray-600 pt-1">
+              <span>Advance Paid</span>
+              <input 
+                type="number"
+                value={advanceAmount}
+                onChange={(e) => setAdvanceAmount(Number(e.target.value))}
+                className="w-20 px-2 py-0.5 text-right border border-gray-300 rounded text-sm focus:outline-none"
+              />
+            </div>
+
+            <div className="flex justify-between font-bold text-indigo-600 text-sm border-t border-dashed border-gray-300 pt-1.5">
+              <span>Balance Due</span>
+              <span>₹{balanceAmount}</span>
+            </div>
+          </div>
+
+          {successMessage && (
+            <div className="p-2 bg-green-100 border border-green-300 text-green-700 text-xs rounded-lg flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              <span>{successMessage}</span>
+            </div>
+          )}
+
+          {/* Submit Action Buttons */}
+          <div className="grid grid-cols-2 gap-2 pt-2">
+            <button
+              onClick={() => handleSubmitOrder(false)}
+              disabled={submitting || cart.length === 0}
+              className="w-full bg-gray-800 hover:bg-gray-900 text-white font-medium py-2.5 rounded-xl transition text-sm disabled:opacity-50"
             >
-              🔄 Load Data
+              Save Only
+            </button>
+            <button
+              onClick={() => handleSubmitOrder(true)}
+              disabled={submitting || cart.length === 0}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+            >
+              <Printer className="w-4 h-4" />
+              Print & Save
             </button>
           </div>
-          
-          <table className={styles.orderTable}>
-            <thead>
-              <tr>
-                <th>Order No</th>
-                <th>Token No</th>
-                <th>Date / Time</th>
-                <th>Waiter</th>
-                <th>Table</th>
-                <th>Type</th>
-                <th>Net Value</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ordersList.map(o => (
-                <tr key={o.id}>
-                  <td data-label="Order No"><strong>{o.order_pfx}{o.order_no}</strong></td>
-                  <td data-label="Token No"><mark><b>{o.token_no}</b></mark></td>
-                  <td data-label="Date / Time">{o.order_date} | {o.order_time}</td>
-                  <td data-label="Waiter">{o.waiter_name || 'Unknown'}</td>
-                  <td data-label="Table">{o.table_no ? `Table ${o.table_no}` : 'N/A'}</td>
-                  <td data-label="Type">{o.order_type}</td>
-                  <td data-label="Net Value" style={{ color: '#16a34a', fontWeight: 'bold' }}>₹{o.net_value}</td>
-                  <td className={styles.actionTd}>
-                    <button onClick={() => startEditOrder(o.id)} className={styles.btnListEdit} style={{marginRight: '6px', background: '#eab308', color:'white', border:'none', padding:'4px 8px', cursor:'pointer'}}>Edit</button>
-                    <button onClick={() => deleteOrder(o.id)} className={styles.btnListDel}>Delete</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
-      )}
+      </div>
 
-      {/* NumPad Modal */}
-      {isNumPadOpen && (
-        <div className={styles.numPadOverlay}>
-          <div className={styles.numPadContainer}>
-            <div className={styles.numPadHeader}>
-              <span>Enter Quantity</span>
-              <button className={styles.closePadBtn} onClick={() => setIsNumPadOpen(false)}>X</button>
+      {/* Measurement Modal Placeholder Component */}
+      {selectedItemForMeasurement && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-gray-800 text-lg">
+                Measurements for {selectedItemForMeasurement.name}
+              </h3>
+              <button 
+                onClick={() => setSelectedItemForMeasurement(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <div className={styles.numPadDisplay}>{numPadValue || '0'}</div>
-            <div className={styles.numPadGrid}>
-              {['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'].map((key) => (
-                <button 
-                  key={key} 
-                  type="button" 
-                  onClick={() => handleNumPadKeyPress(key)}
-                  className={`${styles.numPadBtn} ${key === 'C' ? styles.clearBtn : ''} ${key === '⌫' ? styles.backBtn : ''}`}
-                >
-                  {key}
-                </button>
+            
+            <p className="text-xs text-gray-500 mb-4">
+              Enter key measurements below (e.g., Length, Chest, Waist):
+            </p>
+
+            <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+              {['Length', 'Chest', 'Waist', 'Shoulder', 'Sleeve'].map((field) => (
+                <div key={field} className="flex justify-between items-center">
+                  <label className="text-sm font-medium text-gray-700">{field}</label>
+                  <input
+                    type="text"
+                    defaultValue={selectedItemForMeasurement.measurements?.[field] || ''}
+                    onChange={(e) => {
+                      setItemMeasurements(prev => ({ ...prev, [field]: e.target.value }));
+                    }}
+                    className="w-32 px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
               ))}
             </div>
-            <button type="button" onClick={saveNumPadValue} className={styles.numPadSubmitBtn}>DONE / OK</button>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                onClick={() => setSelectedItemForMeasurement(null)}
+                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleSaveMeasurements(selectedItemForMeasurement.id, itemMeasurements)}
+                className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium"
+              >
+                Save Measurements
+              </button>
+            </div>
           </div>
         </div>
       )}
+
     </div>
   );
-}
+};
 
 export default OrderSetupModule;
