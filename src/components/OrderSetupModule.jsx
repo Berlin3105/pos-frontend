@@ -116,13 +116,16 @@ const OrderSetupModule = () => {
             margin: 0px;
           }
 
-          body { 
+          html, body { 
             width: 270px; 
+            height: auto;
             margin: 0 auto; 
             padding: 5px; 
             font-family: 'Hind Madurai', monospace, sans-serif; 
             font-size: 13px; 
             color: #000; 
+            overflow: hidden;
+            page-break-inside: avoid;
           }
           .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 5px; margin-bottom: 8px; }
           .header h2 { margin: 0; font-size: 18px; font-weight: bold; }
@@ -135,7 +138,7 @@ const OrderSetupModule = () => {
           .totals { border-top: 1px dashed #000; padding-top: 5px; font-size: 12px; }
           .totals-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
           .grand-total { font-weight: bold; font-size: 14px; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 3px 0; margin: 4px 0; }
-          .footer { text-align: center; margin-top: 10px; font-size: 11px; border-top: 1px dashed #000; padding-top: 5px; }
+          .footer { text-align: center; margin-top: 10px; font-size: 11px; border-top: 1px dashed #000; padding-top: 5px; margin-bottom: 0px; padding-bottom: 0px; }
         </style>
       </head>
       <body>
@@ -205,13 +208,16 @@ const OrderSetupModule = () => {
             margin: 0px;
           }
 
-          body { 
+          html, body { 
             width: 270px; 
+            height: auto;
             margin: 0 auto; 
             padding: 5px; 
             font-family: 'Hind Madurai', monospace, sans-serif; 
             font-size: 13px; 
             color: #000; 
+            overflow: hidden;
+            page-break-inside: avoid;
           }
           .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px; }
           .header h2 { margin: 0; font-size: 18px; }
