@@ -8,6 +8,7 @@ import TableSetupModule from './TableSetupModule';
 import OrderSetupModule from './OrderSetupModule';
 import SalesModule from './SalesModule';
 import PasswordSetup from './PasswordSetup';
+import SalesReport from './SalesReport';
 
 function DashboardView({ 
   username, 
@@ -188,6 +189,8 @@ function DashboardView({
               <OrderSetupModule />
           ): activeMenu === 'sales_entry' ? ( 
               <SalesModule />
+          ): activeMenu === 'sales_report' ? ( 
+              <SalesReport />
           ): activeMenu === 'Password_setup' ? ( 
               <PasswordSetup />
           ): (

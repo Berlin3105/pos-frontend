@@ -1,0 +1,191 @@
+.reportContainer {
+  padding: 15px;
+  background-color: #f1f5f9;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Filter Section */
+.filterCard {
+  background: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.filterCard h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  color: #0f172a;
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filterGroup label {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #475569;
+}
+
+.filterGroup input[type="date"],
+.filterGroup select {
+  padding: 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.radioGroup, .checkboxGroup {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-top: 5px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.btnRow {
+  display: flex;
+  gap: 10px;
+}
+
+.fetchBtn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.printBtn {
+  background: #059669;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* A4 Sheet Container Styling */
+.a4Sheet {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.reportHeader {
+  text-align: center;
+  border-bottom: 2px solid #0f172a;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.reportHeader h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.reportHeader p {
+  margin: 4px 0 0 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+/* Table Styles */
+.reportTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-bottom: 15px;
+}
+
+.reportTable th, .reportTable td {
+  border: 1px solid #cbd5e1;
+  padding: 8px;
+  text-align: left;
+}
+
+.reportTable th {
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-weight: bold;
+}
+
+.reportTable tfoot td {
+  background-color: #f1f5f9;
+}
+
+.txtRight { text-align: right !important; }
+.txtCenter { text-align: center !important; }
+
+/* Group Block for Detail Report */
+.groupBlock {
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.groupHeader {
+  background: #e2e8f0;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: #0f172a;
+  border-bottom: 1px solid #94a3b8;
+}
+
+/* 🖨️ A4 PRINT CSS MEDIA QUERY */
+@media print {
+  body {
+    background: white !important;
+  }
+  
+  .noPrint {
+    display: none !important;
+  }
+
+  .reportContainer {
+    padding: 0;
+    background: white;
+  }
+
+  .a4Sheet {
+    box-shadow: none;
+    padding: 0;
+    width: 100%;
+  }
+
+  .reportTable th {
+    background-color: #e2e8f0 !important;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .groupHeader {
+    background-color: #f1f5f9 !important;
+    -webkit-print-color-adjust: exact;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+}
